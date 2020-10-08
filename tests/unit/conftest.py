@@ -1,8 +1,11 @@
 from datetime import datetime
+from http import HTTPStatus
+from unittest.mock import MagicMock
 
 from authlib.jose import jwt
 from pytest import fixture
 
+from api.errors import UNAUTHORIZED, UNKNOWN
 from app import app
 
 
@@ -26,11 +29,22 @@ def client(secret_key):
 def valid_jwt(client):
     header = {'alg': 'HS256'}
 
-    payload = {'username': 'gdavoian', 'superuser': False}
+    payload = {'key': 'key', 'password': 'password'}
 
     secret_key = client.application.secret_key
 
-    return jwt.encode(header, payload, secret_key).decode('ascii')
+    return jwt.encode(header, payload, secret_key, check=False).decode('ascii')
+
+
+@fixture(scope='session')
+def valid_jwt_with_wrong_payload(client):
+    header = {'alg': 'HS256'}
+
+    payload = {'key': 'key'}
+
+    secret_key = client.application.secret_key
+
+    return jwt.encode(header, payload, secret_key, check=False).decode('ascii')
 
 
 @fixture(scope='session')
@@ -48,8 +62,110 @@ def invalid_jwt(valid_jwt):
     payload = jwt_decode(payload)
 
     # Corrupt the valid JWT by tampering with its payload.
-    payload['superuser'] = True
+    payload['key'] = 'wrong'
 
     payload = jwt_encode(payload)
 
     return '.'.join([header, payload, signature])
+
+
+def xforce_api_response_mock(status_code, payload=None):
+    mock_response = MagicMock()
+
+    mock_response.status_code = status_code
+    mock_response.ok = status_code == HTTPStatus.OK
+
+    payload = payload or {}
+    mock_response.json = lambda: payload
+
+    return mock_response
+
+
+@fixture(scope='session')
+def xforce_response_unauthorized_creds(secret_key):
+    return xforce_api_response_mock(
+        HTTPStatus.UNAUTHORIZED,
+        {"error": "Not authorized."}
+    )
+
+
+@fixture(scope='session')
+def xforce_response_ok(secret_key):
+    return xforce_api_response_mock(HTTPStatus.OK)
+
+
+def authorization_error(message):
+    return {
+        'data': {},
+        'errors': [
+            {
+                'code': UNAUTHORIZED,
+                'message': message,
+                'type': 'fatal'
+            }
+        ]
+    }
+
+
+@fixture(scope='module')
+def authorization_header_missing_error_expected_body(route):
+    return authorization_error(
+        'Authorization failed: Authorization header is missing'
+    )
+
+
+@fixture(scope='module')
+def authorization_type_error_expected_body(route):
+    return authorization_error(
+        'Authorization failed: Wrong authorization type',
+    )
+
+
+@fixture(scope='module')
+def jwt_structure_error_expected_body(route):
+    return authorization_error(
+        'Authorization failed: Wrong JWT structure',
+    )
+
+
+@fixture(scope='module')
+def jwt_payload_structure_error_expected_body(route):
+    return authorization_error(
+        'Authorization failed: Wrong JWT payload structure',
+    )
+
+
+@fixture(scope='module')
+def wrong_secret_key_error_expected_body(route):
+    return authorization_error(
+        'Authorization failed: Failed to decode JWT with provided key'
+    )
+
+
+@fixture(scope='module')
+def missed_secret_key_error_expected_body(route):
+    return authorization_error(
+        'Authorization failed: <SECRET_KEY> is missing'
+    )
+
+
+@fixture(scope='module')
+def unauthorized_creds_expected_body(route):
+    return authorization_error(
+        'Authorization failed on IBM X-Force Exchange side'
+    )
+
+
+@fixture(scope='module')
+def ssl_error_expected_body(route):
+    return {
+        'data': {},
+        'errors': [
+            {
+                'code': UNKNOWN,
+                'message': 'Unable to verify SSL certificate:'
+                           ' Self signed certificate',
+                'type': 'fatal'
+            }
+        ]
+    }
