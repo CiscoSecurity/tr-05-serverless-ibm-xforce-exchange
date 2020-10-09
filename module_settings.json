@@ -1,6 +1,9 @@
 {
   "name": "IBM X-Force Exchange",
-  "jwt": "ToDo",
+  "jwt": {
+    "key": "API Key",
+    "password": "API Password"
+  },
   "region": {
     "us": "ToDo",
     "eu": "ToDO",
