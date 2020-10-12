@@ -83,6 +83,9 @@ def jsonify_data(data):
 def jsonify_result():
     result = {'data': {}}
 
+    if g.get('verdicts'):
+        result['data']['verdicts'] = format_docs(g.verdicts)
+
     if g.get('errors'):
         result['errors'] = g.errors
 
@@ -91,3 +94,12 @@ def jsonify_result():
 
 def add_error(error):
     g.errors = [*g.get('errors', []), error.json]
+
+
+def all_subclasses(cls):
+    """
+    Retrieve set of class subclasses recursively.
+
+    """
+    subclasses = set(cls.__subclasses__())
+    return subclasses.union(s for c in subclasses for s in all_subclasses(c))

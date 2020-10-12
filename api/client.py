@@ -15,6 +15,14 @@ NOT_CRITICAL_ERRORS = (
     HTTPStatus.BAD_REQUEST, HTTPStatus.NOT_FOUND, HTTPStatus.NOT_ACCEPTABLE
 )
 
+IP = 'ip'
+IPV6 = 'ipv6'
+DOMAIN = 'domain'
+URL = 'url'
+MD5 = 'md5'
+SHA1 = 'sha1'
+SHA256 = 'sha256'
+
 
 class XForceClient:
     def __init__(self, base_url, credentials, user_agent):
@@ -33,19 +41,32 @@ class XForceClient:
         """
         return self._request('/all-subscriptions/usage')
 
-    def ip_report(self, ip):
+    def get_data(self, observable):
+        observable_type = observable['type']
+        observable_value = observable['value']
+
+        if observable_type in (DOMAIN, URL):
+            return self._url_report(observable_value)
+
+        if observable_type in (IP, IPV6):
+            return self._ip_report(observable_value)
+
+        if observable_type in (MD5, SHA1, SHA256):
+            return self._malware(observable_value)
+
+    def _ip_report(self, ip):
         """
         https://api.xforce.ibmcloud.com/doc/#IP_Reputation_get_ipr_ip
         """
         return self._request(f'/ipr/{ip}')
 
-    def url_report(self, url):
+    def _url_report(self, url):
         """
         https://api.xforce.ibmcloud.com/doc/#URL_get_url_url
         """
         return self._request(f'/url/{url}')
 
-    def malware(self, filehash):
+    def _malware(self, filehash):
         """
         https://api.xforce.ibmcloud.com/doc/#Malware_get_malware_filehash
         """
