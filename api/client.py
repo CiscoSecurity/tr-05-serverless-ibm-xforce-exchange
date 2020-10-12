@@ -33,12 +33,30 @@ class XForceClient:
         """
         return self._request('/all-subscriptions/usage')
 
-    def _request(self, path, method='GET', body=None):
+    def ip_report(self, ip):
+        """
+        https://api.xforce.ibmcloud.com/doc/#IP_Reputation_get_ipr_ip
+        """
+        return self._request(f'/ipr/{ip}')
+
+    def url_report(self, url):
+        """
+        https://api.xforce.ibmcloud.com/doc/#URL_get_url_url
+        """
+        return self._request(f'/url/{url}')
+
+    def malware(self, filehash):
+        """
+        https://api.xforce.ibmcloud.com/doc/#Malware_get_malware_filehash
+        """
+        return self._request(f'/malware/{filehash}')
+
+    def _request(self, path, method='GET'):
         url = urljoin(self.base_url, path)
 
         try:
             response = requests.request(
-                method, url, auth=self.auth, headers=self.headers, json=body
+                method, url, auth=self.auth, headers=self.headers
             )
         except SSLError as error:
             raise XForceSSLError(error)
