@@ -22,6 +22,9 @@ def deliberate_observables():
                           credentials,
                           current_app.config['USER_AGENT'])
 
+    number_of_days_verdict_valid = int(
+        current_app.config['NUMBER_OF_DAYS_VERDICT_IS_VALID']
+    )
     g.verdicts = []
 
     try:
@@ -30,9 +33,14 @@ def deliberate_observables():
 
             if mapping:
                 client_data = client.get_data(observable)
-                verdict = mapping.extract_verdict(client_data)
-                if verdict:
-                    g.verdicts.append(verdict)
+
+                if client_data:
+                    verdict = mapping.extract_verdict(
+                        client_data, number_of_days_verdict_valid
+                    )
+
+                    if verdict:
+                        g.verdicts.append(verdict)
 
     except KeyError:
         g.errors = [{

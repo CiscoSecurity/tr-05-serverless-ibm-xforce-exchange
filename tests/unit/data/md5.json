@@ -1,0 +1,29 @@
+{
+  "input": {
+    "malware": {
+      "origins": {
+        "external": {
+          "source": "reversingLabs",
+          "firstSeen": "2018-12-06T15:22:03Z",
+          "lastSeen": "2019-03-04T20:55:25Z",
+          "detectionCoverage": 0,
+          "family": null
+        }
+      },
+      "type": "md5",
+      "md5": "0x34D5EA586A61B0ABA512C0CB1D3D8B15",
+      "hash": "0x34D5EA586A61B0ABA512C0CB1D3D8B15",
+      "risk": "low"
+    },
+    "tags": []
+},
+  "output": {
+    "type": "verdict",
+    "observable": {
+      "value": "34d5ea586a61b0aba512c0cb1d3d8b15",
+      "type": "md5"
+    },
+    "disposition": 5,
+    "disposition_name": "Unknown"
+  }
+}
