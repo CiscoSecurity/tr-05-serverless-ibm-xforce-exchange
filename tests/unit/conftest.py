@@ -107,58 +107,68 @@ def authorization_error(message):
     }
 
 
+def expected_body(r, body):
+    if r.endswith('/observe/observables'):
+        return {'data': {}}
+
+    if r.endswith('/refer/observables'):
+        return {'data': []}
+
+    return body
+
+
 @fixture(scope='module')
 def authorization_header_missing_error_expected_body(route):
-    return authorization_error(
+    return expected_body(route, authorization_error(
         'Authorization failed: Authorization header is missing'
-    )
+    ))
 
 
 @fixture(scope='module')
 def authorization_type_error_expected_body(route):
-    return authorization_error(
+    return expected_body(route, authorization_error(
         'Authorization failed: Wrong authorization type',
-    )
+    ))
 
 
 @fixture(scope='module')
 def jwt_structure_error_expected_body(route):
-    return authorization_error(
+    return expected_body(route, authorization_error(
         'Authorization failed: Wrong JWT structure',
-    )
+    ))
 
 
 @fixture(scope='module')
 def jwt_payload_structure_error_expected_body(route):
-    return authorization_error(
+    return expected_body(route, authorization_error(
         'Authorization failed: Wrong JWT payload structure',
-    )
+    ))
 
 
 @fixture(scope='module')
 def wrong_secret_key_error_expected_body(route):
-    return authorization_error(
+    return expected_body(route, authorization_error(
         'Authorization failed: Failed to decode JWT with provided key'
-    )
+    ))
 
 
 @fixture(scope='module')
 def missed_secret_key_error_expected_body(route):
-    return authorization_error(
+    return expected_body(route, authorization_error(
         'Authorization failed: <SECRET_KEY> is missing'
-    )
+    ))
 
 
 @fixture(scope='module')
 def unauthorized_creds_expected_body(route):
-    return authorization_error(
+    return expected_body(route, authorization_error(
         'Authorization failed on IBM X-Force Exchange side'
-    )
+    ))
 
 
 @fixture(scope='module')
 def ssl_error_expected_body(route):
-    return {
+    return expected_body(route, {
         'data': {},
         'errors': [
             {
@@ -168,4 +178,4 @@ def ssl_error_expected_body(route):
                 'type': 'fatal'
             }
         ]
-    }
+    })
