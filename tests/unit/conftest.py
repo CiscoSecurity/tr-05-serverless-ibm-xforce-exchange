@@ -85,13 +85,52 @@ def xforce_api_response_mock(status_code, payload=None):
 def xforce_response_unauthorized_creds(secret_key):
     return xforce_api_response_mock(
         HTTPStatus.UNAUTHORIZED,
-        {"error": "Not authorized."}
+        {'error': 'Not authorized.'}
+    )
+
+
+@fixture(scope='session')
+def xforce_response_service_unavailable(secret_key):
+    return xforce_api_response_mock(
+        HTTPStatus.SERVICE_UNAVAILABLE,
+        {'error': 'SERVICE UNAVAILABLE.'}
+    )
+
+
+@fixture(scope='session')
+def xforce_response_not_found(secret_key):
+    return xforce_api_response_mock(
+        HTTPStatus.NOT_FOUND,
+        {'error': 'NOT FOUND.'}
     )
 
 
 @fixture(scope='session')
 def xforce_response_ok(secret_key):
-    return xforce_api_response_mock(HTTPStatus.OK)
+    return xforce_api_response_mock(HTTPStatus.OK, payload='OK')
+
+
+@fixture(scope='session')
+def xforce_response_success_enrich(secret_key):
+    return xforce_api_response_mock(
+        HTTPStatus.OK,
+        payload={
+            'result': {
+                'url': 'ibm.com',
+                'cats': {
+                    'Software / Hardware': True,
+                    'General Business': True
+                },
+                'score': 1,
+                'application': {},
+                'categoryDescriptions': {
+                    'Software / Hardware': 'ABC',
+                    'General Business': 'ABC'
+                }
+            },
+            'tags': []
+        }
+    )
 
 
 def authorization_error(message):
@@ -167,6 +206,26 @@ def unauthorized_creds_expected_body(route):
 
 
 @fixture(scope='module')
+def service_unavailable_expected_body(route):
+    return expected_body(route, {
+        'data': {},
+        'errors': [
+            {
+                'code': UNKNOWN,
+                'message': 'Unexpected response from IBM X-Force Exchange:'
+                           ' SERVICE UNAVAILABLE.',
+                'type': 'fatal'
+            }
+        ]
+    })
+
+
+@fixture(scope='module')
+def not_found_expected_body(route):
+    return expected_body(route, {'data': {}})
+
+
+@fixture(scope='module')
 def ssl_error_expected_body(route):
     return expected_body(route, {
         'data': {},
@@ -179,3 +238,41 @@ def ssl_error_expected_body(route):
             }
         ]
     })
+
+
+@fixture(scope='module')
+def success_enrich_expected_body(route):
+    return expected_body(
+        route,
+        {
+            'data':
+                {
+                    'verdicts':
+                    {
+                        'count': 1,
+                        'docs': [
+                            {'disposition': 5,
+                             'disposition_name': 'Unknown',
+                             'observable': {'type': 'domain',
+                                            'value': 'ibm.com'},
+                             'type': 'verdict'}
+                        ]
+                    }
+                }
+        }
+    )
+
+
+@fixture(scope='module')
+def key_error_body():
+    return {
+        'errors': [
+            {
+                'type': 'fatal',
+                'code': 'key error',
+                'message': 'The data structure of IBM X-Force Exchange '
+                           'has changed. The module is broken.'
+            }
+        ],
+        'data': {}
+    }

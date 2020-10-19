@@ -20,12 +20,30 @@ def route(request):
 
 @fixture(scope='module')
 def valid_json():
-    return [{'type': 'ip', 'value': '1.1.1.1'}]
+    return [{'type': 'domain', 'value': 'ibm.com'}]
 
 
-def test_enrich_call_success(route, client, valid_jwt, valid_json):
-    response = client.post(route, headers=headers(valid_jwt), json=valid_json)
-    assert response.status_code == HTTPStatus.OK
+def test_enrich_call_success(
+        route, client, valid_jwt, valid_json,
+        xforce_response_success_enrich, success_enrich_expected_body
+):
+    with patch('requests.request') as get_mock:
+        get_mock.return_value = xforce_response_success_enrich
+
+        response = client.post(
+            route, headers=headers(valid_jwt), json=valid_json
+        )
+
+        assert response.status_code == HTTPStatus.OK
+
+        response = response.get_json()
+        assert response.get('errors') is None
+
+        if response.get('data') and isinstance(response['data'], dict):
+            for s in response['data'].get('verdicts', {}).get('docs', []):
+                assert s.pop('valid_time')
+
+        assert response == success_enrich_expected_body
 
 
 def test_enrich_call_with_authorization_header_missing(
@@ -111,7 +129,36 @@ def test_enrich_call_with_unauthorized_creds(
         assert response.json == unauthorized_creds_expected_body
 
 
-def test_enrich_call_with_ssl_error_failure(
+def test_enrich_call_with_critical_error(
+        route, client, valid_jwt, valid_json,
+        xforce_response_service_unavailable,
+        service_unavailable_expected_body,
+):
+    with patch('requests.request') as get_mock:
+        get_mock.return_value = xforce_response_service_unavailable
+        response = client.post(
+            route, headers=headers(valid_jwt), json=valid_json
+        )
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.json == service_unavailable_expected_body
+
+
+def test_enrich_call_with_not_critical_error(
+        route, client, valid_jwt, valid_json,
+        xforce_response_not_found, not_found_expected_body,
+):
+    with patch('requests.request') as get_mock:
+        get_mock.return_value = xforce_response_not_found
+        response = client.post(
+            route, headers=headers(valid_jwt), json=valid_json
+        )
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.json == not_found_expected_body
+
+
+def test_enrich_call_with_ssl_error(
         route, client, valid_jwt, valid_json,
         ssl_error_expected_body
 ):
@@ -127,3 +174,21 @@ def test_enrich_call_with_ssl_error_failure(
 
         assert response.status_code == HTTPStatus.OK
         assert response.json == ssl_error_expected_body
+
+
+def test_deliberate_call_with_key_error(
+        client, valid_jwt, valid_json,
+        xforce_response_ok, key_error_body
+):
+    with patch('requests.request') as get_mock,\
+            patch('api.enrich.Mapping.extract_verdict') as extract_mock:
+        get_mock.return_value = xforce_response_ok
+        extract_mock.side_effect = [KeyError('foo')]
+
+        response = client.post(
+            '/deliberate/observables', headers=headers(valid_jwt),
+            json=valid_json
+        )
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.json == key_error_body
