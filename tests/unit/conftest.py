@@ -147,9 +147,6 @@ def authorization_error(message):
 
 
 def expected_body(r, body):
-    if r.endswith('/observe/observables'):
-        return {'data': {}}
-
     if r.endswith('/refer/observables'):
         return {'data': []}
 
