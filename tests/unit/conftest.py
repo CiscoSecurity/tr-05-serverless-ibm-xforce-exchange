@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 from authlib.jose import jwt
 from pytest import fixture
 
-from api.errors import UNAUTHORIZED, UNKNOWN
+from api.errors import AUTH_ERROR, UNKNOWN
 from app import app
 
 
@@ -138,7 +138,7 @@ def authorization_error(message):
         'data': {},
         'errors': [
             {
-                'code': UNAUTHORIZED,
+                'code': AUTH_ERROR,
                 'message': message,
                 'type': 'fatal'
             }

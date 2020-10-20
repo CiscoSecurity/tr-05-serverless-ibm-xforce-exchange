@@ -4,7 +4,7 @@ INVALID_ARGUMENT = 'invalid argument'
 PERMISSION_DENIED = 'permission denied'
 UNKNOWN = 'unknown'
 TOO_MANY_REQUESTS = 'too many requests'
-UNAUTHORIZED = 'unauthorized'
+AUTH_ERROR = 'authorization error'
 NOT_FOUND = 'not found'
 UNAVAILABLE = 'unavailable'
 
@@ -26,7 +26,7 @@ class TRFormattedError(Exception):
 class AuthorizationError(TRFormattedError):
     def __init__(self, message, prefix='Authorization failed: '):
         super().__init__(
-            UNAUTHORIZED,
+            AUTH_ERROR,
             f'{prefix}{message}'
         )
 
@@ -56,7 +56,7 @@ class CriticalXForceResponseError(TRFormattedError):
         """
         status_code_map = {
             HTTPStatus.BAD_REQUEST: INVALID_ARGUMENT,
-            HTTPStatus.UNAUTHORIZED: UNAUTHORIZED,
+            HTTPStatus.UNAUTHORIZED: AUTH_ERROR,
             HTTPStatus.FORBIDDEN: PERMISSION_DENIED,
             HTTPStatus.NOT_FOUND: NOT_FOUND,
             HTTPStatus.TOO_MANY_REQUESTS: TOO_MANY_REQUESTS,
