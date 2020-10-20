@@ -1,0 +1,33 @@
+{
+  "input":{
+    "malware": {
+      "origins": {
+        "external": {
+          "source": "reversingLabs",
+          "firstSeen": "2018-10-10T18:22:06Z",
+          "lastSeen": "2020-04-30T13:23:25Z",
+          "malwareType": "Backdoor",
+          "platform": "Win32",
+          "detectionCoverage": 86,
+          "family": [
+            "nanobot"
+          ]
+        }
+      },
+      "type": "sha256",
+      "sha1": "091835b16192e526ee1b8a04d0fcef534544cad306672066f2ad6973a4b18b19",
+      "hash": "091835b16192e526ee1b8a04d0fcef534544cad306672066f2ad6973a4b18b19",
+      "risk": "high"
+    },
+    "tags": []
+  },
+  "output": {
+    "type": "verdict",
+    "observable": {
+      "value": "091835b16192e526ee1b8a04d0fcef534544cad306672066f2ad6973a4b18b19",
+      "type": "sha256"
+    },
+    "disposition": 2,
+    "disposition_name": "Malicious"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "input": {
+    "result": {
+      "url": "www.ibm.com/smarterplanet",
+      "cats": {
+        "Software / Hardware": true,
+        "General Business": true
+      },
+      "score": 10,
+      "application": {},
+      "categoryDescriptions": {
+        "Software / Hardware": "This category includes Web sites from the area of software, computer hardware and other electronic components.",
+        "General Business": "This category includes Web sites of industry, business, economy and supply of services."
+      }
+    },
+    "tags": []
+  },
+  "output": {
+    "type": "verdict",
+    "observable": {
+      "value": "www.ibm.com/smarterplanet",
+      "type": "url"
+    },
+    "disposition": 2,
+    "disposition_name": "Malicious"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "input": {
+    "ip": "1.2.3.4",
+    "history": [],
+    "subnets": [],
+    "cats": {},
+    "geo": {
+      "country": "Australia",
+      "countrycode": "AU"
+    },
+    "score": 3.9,
+    "reason": "Content analysis",
+    "reasonDescription": "The website on this IP address contains content of the aforementioned category.",
+    "categoryDescriptions": {},
+    "tags": []
+  },
+  "output": {
+    "type": "verdict",
+    "observable": {
+      "value": "1.2.3.4",
+      "type": "ip"
+    },
+    "disposition": 5,
+    "disposition_name": "Unknown"
+  }
+}
