@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 from authlib.jose import jwt
 from pytest import fixture
 
-from api.errors import AUTH_ERROR, UNKNOWN
+from api.errors import UNKNOWN
 from app import app
 
 
@@ -133,18 +133,6 @@ def xforce_response_success_enrich(secret_key):
     )
 
 
-def authorization_error(message):
-    return {
-        'errors': [
-            {
-                'code': AUTH_ERROR,
-                'message': message,
-                'type': 'fatal'
-            }
-        ]
-    }
-
-
 def expected_body(r, body, refer_body=None):
     if r.endswith('/refer/observables'):
         return refer_body if refer_body is not None else {'data': []}
@@ -153,70 +141,20 @@ def expected_body(r, body, refer_body=None):
 
 
 @fixture(scope='module')
-def authorization_header_missing_error_expected_body(
-    route, success_enrich_refer_body
-):
-    return expected_body(route, authorization_error(
-        'Authorization failed: Authorization header is missing'
-    ), refer_body=success_enrich_refer_body)
-
-
-@fixture(scope='module')
-def authorization_type_error_expected_body(route, success_enrich_refer_body):
-    return expected_body(route, authorization_error(
-        'Authorization failed: Wrong authorization type',
-    ), refer_body=success_enrich_refer_body)
-
-
-@fixture(scope='module')
-def jwt_structure_error_expected_body(route, success_enrich_refer_body):
-    return expected_body(route, authorization_error(
-        'Authorization failed: Wrong JWT structure',
-    ), refer_body=success_enrich_refer_body)
-
-
-@fixture(scope='module')
-def jwt_payload_structure_error_expected_body(
-        route, success_enrich_refer_body
-):
-    return expected_body(route, authorization_error(
-        'Authorization failed: Wrong JWT payload structure',
-    ), refer_body=success_enrich_refer_body)
-
-
-@fixture(scope='module')
-def wrong_secret_key_error_expected_body(route, success_enrich_refer_body):
-    return expected_body(route, authorization_error(
-        'Authorization failed: Failed to decode JWT with provided key'
-    ), refer_body=success_enrich_refer_body)
-
-
-@fixture(scope='module')
-def missed_secret_key_error_expected_body(route, success_enrich_refer_body):
-    return expected_body(route, authorization_error(
-        'Authorization failed: <SECRET_KEY> is missing'
-    ), refer_body=success_enrich_refer_body)
-
-
-@fixture(scope='module')
-def unauthorized_creds_expected_body(route, success_enrich_refer_body):
-    return expected_body(route, authorization_error(
-        'Authorization failed on IBM X-Force Exchange side'
-    ), refer_body=success_enrich_refer_body)
-
-
-@fixture(scope='module')
 def service_unavailable_expected_body(route, success_enrich_refer_body):
-    return expected_body(route, {
-        'errors': [
-            {
-                'code': UNKNOWN,
-                'message': 'Unexpected response from IBM X-Force Exchange:'
-                           ' SERVICE UNAVAILABLE.',
-                'type': 'fatal'
-            }
-        ]
-    }, refer_body=success_enrich_refer_body)
+    return expected_body(
+        route,
+        {
+            'errors': [
+                {
+                    'code': UNKNOWN,
+                    'message': 'Unexpected response from IBM X-Force Exchange:'
+                               ' SERVICE UNAVAILABLE.',
+                    'type': 'fatal'
+                }
+            ]
+        },
+        refer_body=success_enrich_refer_body)
 
 
 @fixture(scope='module')
@@ -229,16 +167,19 @@ def not_found_expected_body(route, success_enrich_refer_body):
 
 @fixture(scope='module')
 def ssl_error_expected_body(route, success_enrich_refer_body):
-    return expected_body(route, {
-        'errors': [
-            {
-                'code': UNKNOWN,
-                'message': 'Unable to verify SSL certificate:'
-                           ' Self signed certificate',
-                'type': 'fatal'
-            }
-        ]
-    }, refer_body=success_enrich_refer_body)
+    return expected_body(
+        route,
+        {
+            'errors': [
+                {
+                    'code': UNKNOWN,
+                    'message': 'Unable to verify SSL certificate:'
+                               ' Self signed certificate',
+                    'type': 'fatal'
+                }
+            ]
+        },
+        refer_body=success_enrich_refer_body)
 
 
 @fixture(scope='module')
@@ -249,16 +190,16 @@ def success_enrich_expected_body(route, success_enrich_refer_body):
             'data':
                 {
                     'verdicts':
-                    {
-                        'count': 1,
-                        'docs': [
-                            {'disposition': 5,
-                             'disposition_name': 'Unknown',
-                             'observable': {'type': 'domain',
-                                            'value': 'ibm.com'},
-                             'type': 'verdict'}
-                        ]
-                    }
+                        {
+                            'count': 1,
+                            'docs': [
+                                {'disposition': 5,
+                                 'disposition_name': 'Unknown',
+                                 'observable': {'type': 'domain',
+                                                'value': 'ibm.com'},
+                                 'type': 'verdict'}
+                            ]
+                        }
                 }
         },
         refer_body=success_enrich_refer_body
@@ -281,14 +222,17 @@ def success_enrich_refer_body():
 
 
 @fixture(scope='module')
-def key_error_body():
-    return {
-        'errors': [
-            {
-                'type': 'fatal',
-                'code': 'key error',
-                'message': 'The data structure of IBM X-Force Exchange '
-                           'has changed. The module is broken.'
-            }
-        ]
-    }
+def key_error_expected_body(route, success_enrich_refer_body):
+    return expected_body(
+        route,
+        {
+            'errors': [
+                {
+                    'type': 'fatal',
+                    'code': 'key error',
+                    'message': 'The data structure of IBM X-Force Exchange '
+                               'has changed. The module is broken.'
+                }
+            ]
+        },
+        refer_body=success_enrich_refer_body)
