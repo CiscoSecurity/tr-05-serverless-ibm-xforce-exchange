@@ -23,6 +23,16 @@ MD5 = 'md5'
 SHA1 = 'sha1'
 SHA256 = 'sha256'
 
+XFORCE_OBSERVABLE_TYPES = {
+    DOMAIN: 'domain',
+    URL: 'URL',
+    IP: 'IP',
+    IPV6: 'IPv6',
+    MD5: 'MD5',
+    SHA1: 'SHA1',
+    SHA256: 'SHA256',
+}
+
 
 class XForceClient:
     def __init__(self, base_url, credentials, user_agent):
@@ -34,6 +44,19 @@ class XForceClient:
         self.auth = HTTPBasicAuth(
             credentials['key'], credentials['password']
         )
+
+    @staticmethod
+    def refer_link(ui_url, observable):
+        observable_type = observable['type']
+
+        if observable_type in (DOMAIN, URL):
+            return urljoin(ui_url, f'/url/{observable["value"]}')
+
+        if observable_type in (IP, IPV6):
+            return urljoin(ui_url, f'/ip/{observable["value"]}')
+
+        if observable_type in (MD5, SHA1, SHA256):
+            return urljoin(ui_url, f'/malware/{observable["value"]}')
 
     def usage(self):
         """

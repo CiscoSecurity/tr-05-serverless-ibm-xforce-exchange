@@ -145,64 +145,68 @@ def authorization_error(message):
     }
 
 
-def expected_body(r, body):
+def expected_body(r, body, refer_body=None):
     if r.endswith('/refer/observables'):
-        return {'data': []}
+        return refer_body if refer_body is not None else {'data': []}
 
     return body
 
 
 @fixture(scope='module')
-def authorization_header_missing_error_expected_body(route):
+def authorization_header_missing_error_expected_body(
+    route, success_enrich_refer_body
+):
     return expected_body(route, authorization_error(
         'Authorization failed: Authorization header is missing'
-    ))
+    ), refer_body=success_enrich_refer_body)
 
 
 @fixture(scope='module')
-def authorization_type_error_expected_body(route):
+def authorization_type_error_expected_body(route, success_enrich_refer_body):
     return expected_body(route, authorization_error(
         'Authorization failed: Wrong authorization type',
-    ))
+    ), refer_body=success_enrich_refer_body)
 
 
 @fixture(scope='module')
-def jwt_structure_error_expected_body(route):
+def jwt_structure_error_expected_body(route, success_enrich_refer_body):
     return expected_body(route, authorization_error(
         'Authorization failed: Wrong JWT structure',
-    ))
+    ), refer_body=success_enrich_refer_body)
 
 
 @fixture(scope='module')
-def jwt_payload_structure_error_expected_body(route):
+def jwt_payload_structure_error_expected_body(
+        route, success_enrich_refer_body
+):
     return expected_body(route, authorization_error(
         'Authorization failed: Wrong JWT payload structure',
-    ))
+    ), refer_body=success_enrich_refer_body)
 
 
 @fixture(scope='module')
-def wrong_secret_key_error_expected_body(route):
+def wrong_secret_key_error_expected_body(route, success_enrich_refer_body):
     return expected_body(route, authorization_error(
         'Authorization failed: Failed to decode JWT with provided key'
-    ))
+    ), refer_body=success_enrich_refer_body)
 
 
 @fixture(scope='module')
-def missed_secret_key_error_expected_body(route):
+def missed_secret_key_error_expected_body(route, success_enrich_refer_body):
     return expected_body(route, authorization_error(
         'Authorization failed: <SECRET_KEY> is missing'
-    ))
+    ), refer_body=success_enrich_refer_body)
 
 
 @fixture(scope='module')
-def unauthorized_creds_expected_body(route):
+def unauthorized_creds_expected_body(route, success_enrich_refer_body):
     return expected_body(route, authorization_error(
         'Authorization failed on IBM X-Force Exchange side'
-    ))
+    ), refer_body=success_enrich_refer_body)
 
 
 @fixture(scope='module')
-def service_unavailable_expected_body(route):
+def service_unavailable_expected_body(route, success_enrich_refer_body):
     return expected_body(route, {
         'errors': [
             {
@@ -212,16 +216,19 @@ def service_unavailable_expected_body(route):
                 'type': 'fatal'
             }
         ]
-    })
+    }, refer_body=success_enrich_refer_body)
 
 
 @fixture(scope='module')
-def not_found_expected_body(route):
-    return expected_body(route, {'data': {}})
+def not_found_expected_body(route, success_enrich_refer_body):
+    return expected_body(
+        route, {'data': {}},
+        refer_body=success_enrich_refer_body
+    )
 
 
 @fixture(scope='module')
-def ssl_error_expected_body(route):
+def ssl_error_expected_body(route, success_enrich_refer_body):
     return expected_body(route, {
         'errors': [
             {
@@ -231,11 +238,11 @@ def ssl_error_expected_body(route):
                 'type': 'fatal'
             }
         ]
-    })
+    }, refer_body=success_enrich_refer_body)
 
 
 @fixture(scope='module')
-def success_enrich_expected_body(route):
+def success_enrich_expected_body(route, success_enrich_refer_body):
     return expected_body(
         route,
         {
@@ -253,8 +260,24 @@ def success_enrich_expected_body(route):
                         ]
                     }
                 }
-        }
+        },
+        refer_body=success_enrich_refer_body
     )
+
+
+@fixture(scope='module')
+def success_enrich_refer_body():
+    return {
+        'data': [
+            {
+                "categories": ["Search", "IBM X-Force Exchange"],
+                "description": "Lookup this domain on IBM X-Force Exchange",
+                "id": "ref-ibm-xforce-exchange-search-domain-ibm.com",
+                "title": "Search for this domain",
+                "url": "https://exchange.xforce.ibmcloud.com/url/ibm.com"
+            }
+        ]
+    }
 
 
 @fixture(scope='module')
