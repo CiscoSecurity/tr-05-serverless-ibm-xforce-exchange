@@ -69,6 +69,9 @@ class Mapping(metaclass=ABCMeta):
 
     @staticmethod
     def _disposition(score):
+        if not score:
+            return UNKNOWN_DISPOSITION
+
         segments = [
             (3.9, UNKNOWN_DISPOSITION),
             (6.9, SUSPICIOUS_DISPOSITION),
@@ -87,7 +90,7 @@ class URL(Mapping):
 
     @staticmethod
     def _extract_disposition_score(data):
-        return data['result']['score']
+        return data.get('result', {}).get('score')
 
 
 class Domain(URL):
@@ -103,7 +106,7 @@ class IP(Mapping):
 
     @staticmethod
     def _extract_disposition_score(data):
-        return data['score']
+        return data.get('score')
 
 
 class IPV6(IP):
@@ -115,14 +118,17 @@ class IPV6(IP):
 class FileHash(Mapping, ABC):
     @staticmethod
     def _extract_disposition_score(data):
-        return data['malware']['risk']
+        return data.get('malware', {}).get('risk')
 
     @staticmethod
     def _disposition(score):
+        if not score:
+            return UNKNOWN_DISPOSITION
+
         return {
-            "low": UNKNOWN_DISPOSITION,
-            "medium": SUSPICIOUS_DISPOSITION,
-            "high": MALICIOUS_DISPOSITION
+            'low': UNKNOWN_DISPOSITION,
+            'medium': SUSPICIOUS_DISPOSITION,
+            'high': MALICIOUS_DISPOSITION
         }.get(str(score).lower())
 
 

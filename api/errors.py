@@ -7,6 +7,7 @@ TOO_MANY_REQUESTS = 'too many requests'
 AUTH_ERROR = 'authorization error'
 NOT_FOUND = 'not found'
 UNAVAILABLE = 'unavailable'
+KEY_ERROR = 'key error'
 
 
 class TRFormattedError(Exception):
@@ -36,6 +37,15 @@ class InvalidArgumentError(TRFormattedError):
         super().__init__(
             INVALID_ARGUMENT,
             str(error)
+        )
+
+
+class XForceKeyError(TRFormattedError):
+    def __init__(self):
+        super().__init__(
+            KEY_ERROR,
+            'The data structure of IBM X-Force Exchange has changed.'
+            ' The module is broken.'
         )
 
 

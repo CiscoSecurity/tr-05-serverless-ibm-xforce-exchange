@@ -135,7 +135,6 @@ def xforce_response_success_enrich(secret_key):
 
 def authorization_error(message):
     return {
-        'data': {},
         'errors': [
             {
                 'code': AUTH_ERROR,
@@ -205,7 +204,6 @@ def unauthorized_creds_expected_body(route):
 @fixture(scope='module')
 def service_unavailable_expected_body(route):
     return expected_body(route, {
-        'data': {},
         'errors': [
             {
                 'code': UNKNOWN,
@@ -225,7 +223,6 @@ def not_found_expected_body(route):
 @fixture(scope='module')
 def ssl_error_expected_body(route):
     return expected_body(route, {
-        'data': {},
         'errors': [
             {
                 'code': UNKNOWN,
@@ -270,6 +267,5 @@ def key_error_body():
                 'message': 'The data structure of IBM X-Force Exchange '
                            'has changed. The module is broken.'
             }
-        ],
-        'data': {}
+        ]
     }
