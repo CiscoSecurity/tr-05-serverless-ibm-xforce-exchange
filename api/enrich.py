@@ -4,7 +4,7 @@ from os import cpu_count
 
 from flask import Blueprint, current_app, g
 
-from api.client import XForceClient
+from api.client import XForceClient, XFORCE_OBSERVABLE_TYPES
 from api.errors import XForceKeyError
 from api.mappings import Mapping
 from api.schemas import ObservableSchema
@@ -31,8 +31,9 @@ def deliberate_observables():
     credentials = get_credentials()
 
     observables = get_observables()
-    observables = [ob for ob in observables
-                   if ob['type'] in current_app.config['X_FORCE_OBSERVABLES']]
+    observables = [
+        ob for ob in observables if ob['type'] in XFORCE_OBSERVABLE_TYPES
+    ]
 
     client = XForceClient(current_app.config['API_URL'],
                           credentials,
@@ -95,4 +96,28 @@ def observe_observables():
 
 @enrich_api.route('/refer/observables', methods=['POST'])
 def refer_observables():
-    return jsonify_data([])
+    observables = get_observables()
+
+    ui_url = current_app.config['UI_URL']
+
+    data = []
+    for observable in observables:
+        type_ = XFORCE_OBSERVABLE_TYPES.get(observable['type'])
+        if type_:
+            data.append(
+                {
+                    'id': (
+                        'ref-ibm-xforce-exchange-search-{type}-{value}'.format(
+                            **observable
+                        )
+                    ),
+                    'title': f'Search for this {type_}',
+                    'description': (
+                        f'Lookup this {type_} on IBM X-Force Exchange'
+                    ),
+                    'url': XForceClient.refer_link(ui_url, observable),
+                    'categories': ['Search', 'IBM X-Force Exchange'],
+                }
+            )
+
+    return jsonify_data(data)
