@@ -106,3 +106,7 @@ def all_subclasses(cls):
     """
     subclasses = set(cls.__subclasses__())
     return subclasses.union(s for c in subclasses for s in all_subclasses(c))
+
+
+def time_format(time):
+    return f'{time.isoformat(timespec="seconds")}Z'

@@ -54,13 +54,18 @@ def test_extract_verdict(input_data):
             data['input'], number_of_days_verdict_valid)
 
         start_time = datetime.now()
-        end_time = start_time + timedelta(number_of_days_verdict_valid)
         assert result['valid_time']['start_time'].startswith(
             start_time.isoformat(timespec="minutes")
         )
+
+        if input_data.file in ('md5.json',  'sha1.json',  'sha256.json'):
+            end_time = datetime(2525, 1, 1)
+        else:
+            end_time = start_time + timedelta(number_of_days_verdict_valid)
+
         assert result.pop('valid_time')['end_time'].startswith(
-            end_time.isoformat(timespec="minutes")
-        )
+                end_time.isoformat(timespec="minutes")
+            )
 
         assert result == data['output']
 
