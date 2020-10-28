@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod, ABC
 from datetime import datetime, timedelta
 
-from api.utils import all_subclasses
+from api.utils import all_subclasses, time_format
 
 UNKNOWN_DISPOSITION = 5
 SUSPICIOUS_DISPOSITION = 3
@@ -43,26 +43,28 @@ class Mapping(metaclass=ABCMeta):
 
         """
 
-    def extract_verdict(self, report_data, number_of_days_verdict_valid=30):
-        def time_format(time):
-            return f'{time.isoformat(timespec="seconds")}Z'
+    @staticmethod
+    def verdict_valid_time(number_of_days_verdict_valid):
+        start_time = datetime.now()
+        return {
+            'start_time': time_format(start_time),
+            'end_time': time_format(
+                start_time + timedelta(number_of_days_verdict_valid)
+            )
+        }
 
+    def extract_verdict(self, report_data, number_of_days_verdict_valid=30):
         disposition = self._disposition(
             self._extract_disposition_score(report_data)
         )
         if not disposition:
             return
 
-        start_time = datetime.now()
-        end_time = start_time + timedelta(number_of_days_verdict_valid)
-
         return {
             'type': 'verdict',
             'observable': self.observable,
-            'valid_time': {
-                'start_time': time_format(start_time),
-                'end_time': time_format(end_time),
-            },
+            'valid_time':
+                self.verdict_valid_time(number_of_days_verdict_valid),
             'disposition': disposition,
             'disposition_name': DISPOSITION_NAME_MAP[disposition],
         }
@@ -130,6 +132,13 @@ class FileHash(Mapping, ABC):
             'medium': SUSPICIOUS_DISPOSITION,
             'high': MALICIOUS_DISPOSITION
         }.get(str(score).lower())
+
+    @staticmethod
+    def verdict_valid_time(self, *args, **kwargs):
+        return {
+            'start_time': time_format(datetime.now()),
+            'end_time': time_format(datetime(2525, 1, 1))
+        }
 
 
 class MD5(FileHash):
