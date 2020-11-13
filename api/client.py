@@ -35,6 +35,16 @@ XFORCE_OBSERVABLE_TYPES = {
 
 
 class XForceClient:
+    URL_PATH = 'url'
+    IP_PATH = 'ip'
+    HASH_PATH = 'malware'
+
+    PATH_MAP = {
+        URL: URL_PATH, DOMAIN: URL_PATH,
+        IP: IP_PATH, IPV6: IP_PATH,
+        MD5: HASH_PATH, SHA1: HASH_PATH, SHA256: HASH_PATH
+    }
+
     def __init__(self, base_url, credentials, user_agent):
         self.base_url = base_url
         self.headers = {
@@ -47,16 +57,8 @@ class XForceClient:
 
     @staticmethod
     def refer_link(ui_url, observable):
-        observable_type = observable['type']
-
-        if observable_type in (DOMAIN, URL):
-            return urljoin(ui_url, f'/url/{observable["value"]}')
-
-        if observable_type in (IP, IPV6):
-            return urljoin(ui_url, f'/ip/{observable["value"]}')
-
-        if observable_type in (MD5, SHA1, SHA256):
-            return urljoin(ui_url, f'/malware/{observable["value"]}')
+        path = XForceClient.PATH_MAP.get(observable['type'])
+        return urljoin(ui_url, f'/{path}/{observable["value"]}')
 
     def usage(self):
         """
@@ -64,36 +66,24 @@ class XForceClient:
         """
         return self._request('/all-subscriptions/usage')
 
-    def get_data(self, observable):
-        observable_type = observable['type']
-        observable_value = observable['value']
-
-        if observable_type in (DOMAIN, URL):
-            return self._url_report(observable_value)
-
-        if observable_type in (IP, IPV6):
-            return self._ip_report(observable_value)
-
-        if observable_type in (MD5, SHA1, SHA256):
-            return self._malware(observable_value)
-
-    def _ip_report(self, ip):
+    def report(self, observable):
         """
         https://api.xforce.ibmcloud.com/doc/#IP_Reputation_get_ipr_ip
-        """
-        return self._request(f'/ipr/{ip}')
-
-    def _url_report(self, url):
-        """
         https://api.xforce.ibmcloud.com/doc/#URL_get_url_url
-        """
-        return self._request(f'/url/{url}')
-
-    def _malware(self, filehash):
-        """
         https://api.xforce.ibmcloud.com/doc/#Malware_get_malware_filehash
         """
-        return self._request(f'/malware/{filehash}')
+        path = self.PATH_MAP.get(observable['type'])
+        if path == self.IP_PATH:
+            path = 'ipr'
+        if path:
+            return self._request(f'/{path}/{observable["value"]}')
+
+    def api_linkage(self, observable):
+        path = self.PATH_MAP.get(observable['type'])
+        if path:
+            return self._request(
+                f'/api/linkage/{path}/{observable["value"]}?maxpertype=20'
+            )
 
     def _request(self, path, method='GET'):
         url = urljoin(self.base_url, path)
@@ -107,11 +97,6 @@ class XForceClient:
 
         if response.ok:
             return response.json()
-
-        if response.status_code == HTTPStatus.UNAUTHORIZED:
-            raise AuthorizationError(
-                'Authorization failed on IBM X-Force Exchange side', prefix=''
-            )
 
         if response.status_code in NOT_CRITICAL_ERRORS:
             return {}

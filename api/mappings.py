@@ -3,6 +3,10 @@ from datetime import datetime, timedelta
 
 from api.utils import all_subclasses, time_format
 
+CTIM_DEFAULTS = {
+    'schema_version': '1.0.17',
+}
+
 UNKNOWN_DISPOSITION = 5
 SUSPICIOUS_DISPOSITION = 3
 MALICIOUS_DISPOSITION = 2
@@ -83,6 +87,55 @@ class Mapping(metaclass=ABCMeta):
         for bound, result in segments:
             if score <= bound:
                 return result
+
+    def extract_sightings(self, api_linkage_data):
+        linked_entities = api_linkage_data['linkedEntities']
+        UI_URL = 'https://exchange.xforce.ibmcloud.com/'  # ToDo: get from config
+
+        external_references_map = {
+            entity['id']: {
+                'source_name': 'X-Force Exchange',
+                'external_id': entity['id'],
+                'url': f'{UI_URL}/collection/{entity["title"]}-{entity["id"]}'
+            } for entity in linked_entities
+        }
+        external_ids = list(external_references_map.keys())
+        external_references = list(external_references_map.values())
+
+        def sighting(entity):
+            external_reference = external_references_map[entity['id']]
+            return {
+                **CTIM_DEFAULTS,
+                # ToDo 'id': f'transient:sighting-{uuid4()}',
+                'type': 'sighting',
+                'confidence': 'High',
+                'count': 1,
+                'title':
+                    f'Contained in Collection: {entity["title"]}',
+                'observables': [self.observable],
+                'observed_time': {
+                    'start_time': entity['created'],
+                    'end_time': entity['created'],
+                },
+                # ToDo do one time!!!
+                'external_ids': external_ids,
+                'external_references': external_references,
+
+                'source': 'X-Force Exchange',
+                'source_uri': external_reference['url'],
+
+                'internal':
+                    {'1owned': True, '3public': False}.get(entity['category']), # ToDo: more categories? default value?
+
+            }
+
+
+
+
+
+        return [sighting(entity) for entity in linked_entities]
+
+
 
 
 class URL(Mapping):
