@@ -1,4 +1,5 @@
 import json
+from uuid import uuid5, uuid4
 
 from authlib.jose import jwt
 from authlib.jose.errors import BadSignatureError, DecodeError
@@ -112,3 +113,10 @@ def all_subclasses(cls):
 
 def time_format(time):
     return f'{time.isoformat(timespec="seconds")}Z'
+
+
+def transient_id(entity_type: str, base_value=None) -> str:
+    uuid = (uuid5(current_app.config['NAMESPACE_BASE'],
+                  f'{entity_type}-{base_value}')
+            if base_value else uuid4())
+    return f'transient:{entity_type}-{uuid}'

@@ -7,7 +7,6 @@ from requests.exceptions import SSLError
 
 from api.errors import (
     CriticalXForceResponseError,
-    AuthorizationError,
     XForceSSLError
 )
 

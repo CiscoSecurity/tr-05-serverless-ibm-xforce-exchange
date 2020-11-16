@@ -1,10 +1,11 @@
 from abc import ABCMeta, abstractmethod, ABC
 from datetime import datetime, timedelta
+from urllib.parse import urljoin
 
-from api.utils import all_subclasses, time_format
+from api.utils import all_subclasses, time_format, transient_id
 
 CTIM_DEFAULTS = {
-    'schema_version': '1.0.17',
+    'schema_version': '1.0.22',
 }
 
 UNKNOWN_DISPOSITION = 5
@@ -16,6 +17,8 @@ DISPOSITION_NAME_MAP = {
     SUSPICIOUS_DISPOSITION: 'Suspicious',
     MALICIOUS_DISPOSITION: 'Malicious',
 }
+
+SOURCE = 'IBM X-Force Exchange'
 
 
 class Mapping(metaclass=ABCMeta):
@@ -88,15 +91,15 @@ class Mapping(metaclass=ABCMeta):
             if score <= bound:
                 return result
 
-    def extract_sightings(self, api_linkage_data):
-        linked_entities = api_linkage_data['linkedEntities']
-        UI_URL = 'https://exchange.xforce.ibmcloud.com/'  # ToDo: get from config
+    def extract_sightings(self, api_linkage_data, ui_url):
+        linked_entities = api_linkage_data.get('linkedEntities', [])
 
         external_references_map = {
             entity['id']: {
-                'source_name': 'X-Force Exchange',
+                'source_name': SOURCE,
                 'external_id': entity['id'],
-                'url': f'{UI_URL}/collection/{entity["title"]}-{entity["id"]}'
+                'url': urljoin(ui_url,
+                               f'/collection/{entity["title"]}-{entity["id"]}')
             } for entity in linked_entities
         }
         external_ids = list(external_references_map.keys())
@@ -106,7 +109,7 @@ class Mapping(metaclass=ABCMeta):
             external_reference = external_references_map[entity['id']]
             return {
                 **CTIM_DEFAULTS,
-                # ToDo 'id': f'transient:sighting-{uuid4()}',
+                'id': transient_id('sighting', entity['id']),
                 'type': 'sighting',
                 'confidence': 'High',
                 'count': 1,
@@ -117,25 +120,18 @@ class Mapping(metaclass=ABCMeta):
                     'start_time': entity['created'],
                     'end_time': entity['created'],
                 },
-                # ToDo do one time!!!
                 'external_ids': external_ids,
                 'external_references': external_references,
-
-                'source': 'X-Force Exchange',
+                'source': SOURCE,
                 'source_uri': external_reference['url'],
-
+                # ToDo: Add more categories
                 'internal':
-                    {'1owned': True, '3public': False}.get(entity['category']), # ToDo: more categories? default value?
+                    {'1owned': True,
+                     '3public': False}.get(entity['category']),
 
             }
 
-
-
-
-
         return [sighting(entity) for entity in linked_entities]
-
-
 
 
 class URL(Mapping):

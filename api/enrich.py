@@ -91,7 +91,10 @@ def observe_observables():
 
                 api_linkage = client.api_linkage(observable)
                 if api_linkage:
-                    g.sightings.extend(mapping.extract_sightings(api_linkage))
+                    g.sightings.extend(
+                        mapping.extract_sightings(api_linkage,
+                                                  current_app.config['UI_URL'])
+                    )
 
     except KeyError:
         add_error(XForceKeyError())
