@@ -1,7 +1,12 @@
 from abc import ABCMeta, abstractmethod, ABC
 from datetime import datetime, timedelta
+from urllib.parse import urljoin
 
-from api.utils import all_subclasses, time_format
+from api.utils import all_subclasses, time_format, transient_id
+
+CTIM_DEFAULTS = {
+    'schema_version': '1.0.22',
+}
 
 UNKNOWN_DISPOSITION = 5
 SUSPICIOUS_DISPOSITION = 3
@@ -12,6 +17,8 @@ DISPOSITION_NAME_MAP = {
     SUSPICIOUS_DISPOSITION: 'Suspicious',
     MALICIOUS_DISPOSITION: 'Malicious',
 }
+
+SOURCE = 'IBM X-Force Exchange'
 
 
 class Mapping(metaclass=ABCMeta):
@@ -83,6 +90,48 @@ class Mapping(metaclass=ABCMeta):
         for bound, result in segments:
             if score <= bound:
                 return result
+
+    def extract_sightings(self, api_linkage_data, ui_url):
+        linked_entities = api_linkage_data.get('linkedEntities', [])
+
+        external_references_map = {
+            entity['id']: {
+                'source_name': SOURCE,
+                'external_id': entity['id'],
+                'url': urljoin(ui_url,
+                               f'/collection/{entity["title"]}-{entity["id"]}')
+            } for entity in linked_entities
+        }
+        external_ids = list(external_references_map.keys())
+        external_references = list(external_references_map.values())
+
+        def sighting(entity):
+            external_reference = external_references_map[entity['id']]
+            return {
+                **CTIM_DEFAULTS,
+                'id': transient_id('sighting', entity['id']),
+                'type': 'sighting',
+                'confidence': 'High',
+                'count': 1,
+                'title':
+                    f'Contained in Collection: {entity["title"]}',
+                'observables': [self.observable],
+                'observed_time': {
+                    'start_time': entity['created'],
+                    'end_time': entity['created'],
+                },
+                'external_ids': external_ids,
+                'external_references': external_references,
+                'source': SOURCE,
+                'source_uri': external_reference['url'],
+                # ToDo: Add more categories
+                'internal':
+                    {'1owned': True,
+                     '3public': False}.get(entity['category']),
+
+            }
+
+        return [sighting(entity) for entity in linked_entities]
 
 
 class URL(Mapping):

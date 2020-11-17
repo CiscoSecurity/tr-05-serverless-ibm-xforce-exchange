@@ -22,7 +22,7 @@ get_observables = partial(get_json, schema=ObservableSchema(many=True))
 def deliberate_observables():
     def deliberate(observable):
         mapping = Mapping.for_(observable)
-        client_data = client.get_data(observable)
+        client_data = client.report(observable)
         if client_data:
             return mapping.extract_verdict(
                 client_data, number_of_days_verdict_valid
@@ -73,20 +73,28 @@ def observe_observables():
     )
 
     g.verdicts = []
+    g.sightings = []
     try:
         for observable in observables:
             mapping = Mapping.for_(observable)
 
             if mapping:
-                client_data = client.get_data(observable)
+                report = client.report(observable)
 
-                if client_data:
+                if report:
                     verdict = mapping.extract_verdict(
-                        client_data, number_of_days_verdict_valid
+                        report, number_of_days_verdict_valid
                     )
 
                     if verdict:
                         g.verdicts.append(verdict)
+
+                api_linkage = client.api_linkage(observable)
+                if api_linkage:
+                    g.sightings.extend(
+                        mapping.extract_sightings(api_linkage,
+                                                  current_app.config['UI_URL'])
+                    )
 
     except KeyError:
         add_error(XForceKeyError())

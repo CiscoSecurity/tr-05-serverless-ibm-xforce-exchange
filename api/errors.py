@@ -25,10 +25,10 @@ class TRFormattedError(Exception):
 
 
 class AuthorizationError(TRFormattedError):
-    def __init__(self, message, prefix='Authorization failed: '):
+    def __init__(self, message):
         super().__init__(
             AUTH_ERROR,
-            f'{prefix}{message}'
+            f'Authorization failed: {message}'
         )
 
 
@@ -64,6 +64,7 @@ class CriticalXForceResponseError(TRFormattedError):
         """
         https://api.xforce.ibmcloud.com/doc/#error_handling
         """
+
         status_code_map = {
             HTTPStatus.BAD_REQUEST: INVALID_ARGUMENT,
             HTTPStatus.UNAUTHORIZED: AUTH_ERROR,
@@ -74,8 +75,13 @@ class CriticalXForceResponseError(TRFormattedError):
             HTTPStatus.SERVICE_UNAVAILABLE: UNKNOWN,
         }
 
+        if response.status_code == HTTPStatus.UNAUTHORIZED:
+            message = 'Authorization failed on IBM X-Force Exchange side'
+        else:
+            message = (f'Unexpected response from'
+                       f' IBM X-Force Exchange: {response.json()["error"]}')
+
         super().__init__(
             status_code_map.get(response.status_code),
-            f'Unexpected response'
-            f' from IBM X-Force Exchange: {response.json()["error"]}'
+            message
         )

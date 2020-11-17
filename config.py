@@ -1,4 +1,5 @@
 import os
+from uuid import NAMESPACE_X500
 
 from __version__ import VERSION
 
@@ -15,3 +16,5 @@ class Config:
                   '<tr-integrations-support@cisco.com>')
 
     NUMBER_OF_DAYS_VERDICT_IS_VALID = 30
+
+    NAMESPACE_BASE = NAMESPACE_X500
