@@ -7,6 +7,7 @@ from api.utils import all_subclasses, time_format, transient_id
 CTIM_DEFAULTS = {
     'schema_version': '1.0.22',
 }
+SOURCE = 'IBM X-Force Exchange'
 
 UNKNOWN_DISPOSITION = 5
 SUSPICIOUS_DISPOSITION = 3
@@ -18,7 +19,11 @@ DISPOSITION_NAME_MAP = {
     MALICIOUS_DISPOSITION: 'Malicious',
 }
 
-SOURCE = 'IBM X-Force Exchange'
+NONE_SEVERITY = 'None'
+UNKNOWN_SEVERITY = 'Unknown'
+LOW_SEVERITY = 'Low'
+MEDIUM_SEVERITY = 'Medium'
+HIGH_SEVERITY = 'High'
 
 
 class Mapping(metaclass=ABCMeta):
@@ -41,55 +46,25 @@ class Mapping(metaclass=ABCMeta):
     def type(cls):
         """Return the observable type that the mapping is able to process."""
 
-    @staticmethod
     @abstractmethod
-    def _extract_disposition_score(data):
-        """
-        Extract the value disposition is based on
-        from an X-Force API record.
+    def extract_judgements(
+            self, report_data, number_of_days_judgements_valid
+    ):
+        """Extract a list of CTIM judgements from X-Force report."""
 
-        """
-
-    @staticmethod
-    def verdict_valid_time(number_of_days_verdict_valid):
-        start_time = datetime.now()
-        return {
-            'start_time': time_format(start_time),
-            'end_time': time_format(
-                start_time + timedelta(number_of_days_verdict_valid)
-            )
-        }
-
-    def extract_verdict(self, report_data, number_of_days_verdict_valid=30):
+    def extract_verdict(self, report_data, number_of_days_verdict_valid):
         disposition = self._disposition(
             self._extract_disposition_score(report_data)
         )
-        if not disposition:
-            return
 
         return {
-            'type': 'verdict',
-            'observable': self.observable,
-            'valid_time':
-                self.verdict_valid_time(number_of_days_verdict_valid),
             'disposition': disposition,
+            'observable': self.observable,
+            'type': 'verdict',
+            'valid_time':
+                self._valid_time(number_of_days_verdict_valid),
             'disposition_name': DISPOSITION_NAME_MAP[disposition],
         }
-
-    @staticmethod
-    def _disposition(score):
-        if not score:
-            return UNKNOWN_DISPOSITION
-
-        segments = [
-            (3.9, UNKNOWN_DISPOSITION),
-            (6.9, SUSPICIOUS_DISPOSITION),
-            (10, MALICIOUS_DISPOSITION)
-        ]
-
-        for bound, result in segments:
-            if score <= bound:
-                return result
 
     def extract_sightings(self, api_linkage_data, ui_url):
         linked_entities = api_linkage_data.get('linkedEntities', [])
@@ -110,28 +85,83 @@ class Mapping(metaclass=ABCMeta):
             return {
                 **CTIM_DEFAULTS,
                 'id': transient_id('sighting', entity['id']),
-                'type': 'sighting',
                 'confidence': 'High',
                 'count': 1,
-                'title':
-                    f'Contained in Collection: {entity["title"]}',
-                'observables': [self.observable],
                 'observed_time': {
                     'start_time': entity['created'],
                     'end_time': entity['created'],
                 },
+                'type': 'sighting',
                 'external_ids': external_ids,
                 'external_references': external_references,
+                'internal':
+                    entity['category'] in ('1owned', '2shared'),
+                'observables': [self.observable],
                 'source': SOURCE,
                 'source_uri': external_reference['url'],
-                # ToDo: Add more categories
-                'internal':
-                    {'1owned': True,
-                     '3public': False}.get(entity['category']),
-
+                'title':
+                    f'Contained in Collection: {entity["title"]}',
             }
 
         return [sighting(entity) for entity in linked_entities]
+
+    def _judgement(self, score, number_of_days_judgements_valid):
+        disposition = self._disposition(score)
+        return {
+            **CTIM_DEFAULTS,
+            'id': transient_id('judgement'),
+            'confidence': 'High',
+            'disposition': disposition,
+            'disposition_name': DISPOSITION_NAME_MAP[disposition],
+            'observable': self.observable,
+            'priority': 85,
+            'severity': self._severity(score),
+            'source': SOURCE,
+            'type': 'judgement',
+            'valid_time': self._valid_time(number_of_days_judgements_valid)
+        }
+
+    @staticmethod
+    @abstractmethod
+    def _extract_disposition_score(data):
+        """
+        Extract the value disposition is based on
+        from an X-Force API record.
+
+        """
+
+    @staticmethod
+    @abstractmethod
+    def _severity(score):
+        """Map score value to CTIM severity."""
+
+    @staticmethod
+    def _disposition(score):
+        if not score:
+            return UNKNOWN_DISPOSITION
+
+        segments = [
+            (3.9, UNKNOWN_DISPOSITION),
+            (6.9, SUSPICIOUS_DISPOSITION),
+            (10, MALICIOUS_DISPOSITION)
+        ]
+
+        for bound, result in segments:
+            if score <= bound:
+                return result
+
+    @staticmethod
+    def _valid_time(number_of_days_valid=None):
+        start_time = datetime.now()
+        if number_of_days_valid is None:
+            end_time = datetime(2525, 1, 1)
+        else:
+            end_time = start_time + timedelta(number_of_days_valid)
+
+        return {
+            'start_time': time_format(start_time),
+            'end_time': time_format(end_time)
+        }
 
 
 class URL(Mapping):
@@ -139,9 +169,17 @@ class URL(Mapping):
     def type(cls):
         return 'url'
 
+    def extract_judgements(*args, **kwargs):
+        # There is no score to base judgement on.
+        return []
+
     @staticmethod
     def _extract_disposition_score(data):
         return data.get('result', {}).get('score')
+
+    @staticmethod
+    def _severity(score):
+        pass
 
 
 class Domain(URL):
@@ -155,9 +193,33 @@ class IP(Mapping):
     def type(cls):
         return 'ip'
 
+    def extract_judgements(
+            self, report_data, number_of_days_judgements_valid
+    ):
+        return [
+            self._judgement(score / 10, number_of_days_judgements_valid)
+            for score in report_data.get('cats', {}).values()
+            # The original score value is in the 0-100 range
+        ]
+
     @staticmethod
     def _extract_disposition_score(data):
         return data.get('score')
+
+    @staticmethod
+    def _severity(score):
+        if not score:
+            return UNKNOWN_SEVERITY
+
+        segments = [
+            (3.9, LOW_SEVERITY),
+            (6.9, MEDIUM_SEVERITY),
+            (10, HIGH_SEVERITY)
+        ]
+
+        for bound, result in segments:
+            if score <= bound:
+                return result
 
 
 class IPV6(IP):
@@ -167,9 +229,34 @@ class IPV6(IP):
 
 
 class FileHash(Mapping, ABC):
+    def extract_verdict(self, report_data, *args):
+        return super().extract_verdict(
+            report_data,
+            number_of_days_verdict_valid=None,
+        )
+
+    def extract_judgements(
+        self, report_data, number_of_days_judgements_valid
+    ):
+        return [
+            self._judgement(self._extract_disposition_score(report_data),
+                            number_of_days_judgements_valid)
+        ]
+
     @staticmethod
     def _extract_disposition_score(data):
         return data.get('malware', {}).get('risk')
+
+    @staticmethod
+    def _severity(score):
+        if score is None:
+            return NONE_SEVERITY
+
+        score = str(score).capitalize()
+        if score in (LOW_SEVERITY, MEDIUM_SEVERITY, HIGH_SEVERITY):
+            return score
+
+        return UNKNOWN_SEVERITY
 
     @staticmethod
     def _disposition(score):
@@ -181,13 +268,6 @@ class FileHash(Mapping, ABC):
             'medium': SUSPICIOUS_DISPOSITION,
             'high': MALICIOUS_DISPOSITION
         }.get(str(score).lower())
-
-    @staticmethod
-    def verdict_valid_time(self, *args, **kwargs):
-        return {
-            'start_time': time_format(datetime.now()),
-            'end_time': time_format(datetime(2525, 1, 1))
-        }
 
 
 class MD5(FileHash):

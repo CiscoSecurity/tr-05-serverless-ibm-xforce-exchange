@@ -16,5 +16,6 @@ class Config:
                   '<tr-integrations-support@cisco.com>')
 
     NUMBER_OF_DAYS_VERDICT_IS_VALID = 30
+    NUMBER_OF_DAYS_JUDGEMENT_IS_VALID = 7
 
     NAMESPACE_BASE = NAMESPACE_X500
