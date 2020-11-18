@@ -71,9 +71,13 @@ def observe_observables():
     number_of_days_verdict_valid = int(
         current_app.config['NUMBER_OF_DAYS_VERDICT_IS_VALID']
     )
+    number_of_days_judgement_valid = int(
+        current_app.config['NUMBER_OF_DAYS_JUDGEMENT_IS_VALID']
+    )
 
     g.verdicts = []
     g.sightings = []
+    g.judgements = []
     try:
         for observable in observables:
             mapping = Mapping.for_(observable)
@@ -85,9 +89,14 @@ def observe_observables():
                     verdict = mapping.extract_verdict(
                         report, number_of_days_verdict_valid
                     )
-
                     if verdict:
                         g.verdicts.append(verdict)
+
+                    g.judgements.extend(
+                        mapping.extract_judgements(
+                            report, number_of_days_judgement_valid
+                        )
+                    )
 
                 api_linkage = client.api_linkage(observable)
                 if api_linkage:
