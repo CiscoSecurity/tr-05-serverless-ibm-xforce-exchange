@@ -66,7 +66,7 @@ class Mapping(metaclass=ABCMeta):
             'disposition_name': DISPOSITION_NAME_MAP[disposition],
         }
 
-    def extract_sightings_and_indicators(
+    def extract_sightings_indicators_relationships(
             self, api_linkage_data, report_data,
             ui_url, number_of_days_indicator_valid
     ):
@@ -120,14 +120,29 @@ class Mapping(metaclass=ABCMeta):
                 'title': entity["title"],
             }
 
+        def sighting_of(sighting, indicator):
+            return {
+                **CTIM_DEFAULTS,
+                'id': transient_id('relationship'),
+                'type': 'relationship',
+                # ToDo: verify with Michael
+                'relationship_type': 'sighting-of',
+                'source_ref': sighting['id'],
+                'target_ref': indicator['id']
+            }
+
         sightings = []
         indicators = []
+        relationships = []
         for entity in linked_entities:
             common_value = common(entity)
-            sightings.append({**sighting(entity), **common_value})
-            indicators.append({**indicator(entity), **common_value})
+            s = {**sighting(entity), **common_value}
+            i = {**indicator(entity), **common_value}
+            sightings.append(s)
+            indicators.append(i)
+            relationships.append(sighting_of(s, i))
 
-        return sightings, indicators
+        return sightings, indicators, relationships
 
     def _judgement(self, score, number_of_days_judgements_valid):
         disposition = self._disposition(score)
@@ -197,7 +212,7 @@ class URL(Mapping):
         # There is no score to base judgement on - indicators is added instead.
         return []
 
-    def extract_sightings_and_indicators(
+    def extract_sightings_indicators_relationships(
             self, api_linkage_data, report_data,
             ui_url, number_of_days_indicator_valid
     ):
@@ -216,9 +231,11 @@ class URL(Mapping):
                 'title': category
             }
 
-        sightings, indicators = super().extract_sightings_and_indicators(
-            api_linkage_data, report_data,
-            ui_url, number_of_days_indicator_valid
+        sightings, indicators, relationships = (
+            super().extract_sightings_indicators_relationships(
+                api_linkage_data, report_data,
+                ui_url, number_of_days_indicator_valid
+            )
         )
 
         report_data_indicators = [
@@ -226,7 +243,7 @@ class URL(Mapping):
             in report_data.get('result', {}).get('cats', {}).items() if flag
         ]
 
-        return sightings, [*indicators, *report_data_indicators]
+        return sightings, [*indicators, *report_data_indicators], relationships
 
     @staticmethod
     def _extract_disposition_score(data):

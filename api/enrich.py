@@ -82,6 +82,7 @@ def observe_observables():
     g.sightings = []
     g.judgements = []
     g.indicators = []
+    g.relationships = []
 
     try:
         for observable in observables:
@@ -105,14 +106,15 @@ def observe_observables():
 
                 api_linkage = client.api_linkage(observable)
                 if api_linkage:
-                    sightings, indicators = (
-                        mapping.extract_sightings_and_indicators(
+                    sightings, indicators, relationships = (
+                        mapping.extract_sightings_indicators_relationships(
                             api_linkage, report, current_app.config['UI_URL'],
                             number_of_days_indicator_valid
                         )
                     )
                     g.sightings.extend(sightings)
                     g.indicators.extend(indicators)
+                    g.relationships.extend(relationships)
 
     except KeyError:
         add_error(XForceKeyError())
