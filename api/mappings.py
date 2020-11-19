@@ -120,13 +120,12 @@ class Mapping(metaclass=ABCMeta):
                 'title': entity["title"],
             }
 
-        def sighting_of(sighting, indicator):
+        def member_of(sighting, indicator):
             return {
                 **CTIM_DEFAULTS,
                 'id': transient_id('relationship'),
                 'type': 'relationship',
-                # ToDo: verify with Michael
-                'relationship_type': 'sighting-of',
+                'relationship_type': 'member-of',
                 'source_ref': sighting['id'],
                 'target_ref': indicator['id']
             }
@@ -140,7 +139,7 @@ class Mapping(metaclass=ABCMeta):
             i = {**indicator(entity), **common_value}
             sightings.append(s)
             indicators.append(i)
-            relationships.append(sighting_of(s, i))
+            relationships.append(member_of(s, i))
 
         return sightings, indicators, relationships
 
