@@ -74,10 +74,15 @@ def observe_observables():
     number_of_days_judgement_valid = int(
         current_app.config['NUMBER_OF_DAYS_JUDGEMENT_IS_VALID']
     )
+    number_of_days_indicator_valid = int(
+        current_app.config['NUMBER_OF_DAYS_INDICATOR_IS_VALID']
+    )
 
     g.verdicts = []
     g.sightings = []
     g.judgements = []
+    g.indicators = []
+
     try:
         for observable in observables:
             mapping = Mapping.for_(observable)
@@ -100,10 +105,14 @@ def observe_observables():
 
                 api_linkage = client.api_linkage(observable)
                 if api_linkage:
-                    g.sightings.extend(
-                        mapping.extract_sightings(api_linkage,
-                                                  current_app.config['UI_URL'])
+                    sightings, indicators = (
+                        mapping.extract_sightings_and_indicators(
+                            api_linkage, report, current_app.config['UI_URL'],
+                            number_of_days_indicator_valid
+                        )
                     )
+                    g.sightings.extend(sightings)
+                    g.indicators.extend(indicators)
 
     except KeyError:
         add_error(XForceKeyError())

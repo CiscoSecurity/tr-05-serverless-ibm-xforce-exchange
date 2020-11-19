@@ -66,7 +66,10 @@ class Mapping(metaclass=ABCMeta):
             'disposition_name': DISPOSITION_NAME_MAP[disposition],
         }
 
-    def extract_sightings(self, api_linkage_data, ui_url):
+    def extract_sightings_and_indicators(
+            self, api_linkage_data, report_data,
+            ui_url, number_of_days_indicator_valid
+    ):
         linked_entities = api_linkage_data.get('linkedEntities', [])
 
         external_references_map = {
@@ -80,30 +83,51 @@ class Mapping(metaclass=ABCMeta):
         external_ids = list(external_references_map.keys())
         external_references = list(external_references_map.values())
 
-        def sighting(entity):
+        def common(entity):
             external_reference = external_references_map[entity['id']]
             return {
                 **CTIM_DEFAULTS,
-                'id': transient_id('sighting', entity['id']),
                 'confidence': 'High',
+                'external_ids': external_ids,
+                'external_references': external_references,
+                'source': SOURCE,
+                'source_uri': external_reference['url'],
+            }
+
+        def sighting(entity):
+            return {
+                'id': transient_id('sighting', entity['id']),
                 'count': 1,
                 'observed_time': {
                     'start_time': entity['created'],
                     'end_time': entity['created'],
                 },
                 'type': 'sighting',
-                'external_ids': external_ids,
-                'external_references': external_references,
+                # Original values: "1owned", "2shared", "3public", "4premier"
                 'internal':
-                    entity['category'] in ('1owned', '2shared'),
+                    entity['category'] == '1owned',
                 'observables': [self.observable],
-                'source': SOURCE,
-                'source_uri': external_reference['url'],
                 'title':
                     f'Contained in Collection: {entity["title"]}',
             }
 
-        return [sighting(entity) for entity in linked_entities]
+        def indicator(entity):
+            return {
+                'id': transient_id('indicator', entity['id']),
+                'producer': entity['owner']['name'],
+                'type': 'indicator',
+                'valid_time': self._valid_time(number_of_days_indicator_valid),
+                'title': entity["title"],
+            }
+
+        sightings = []
+        indicators = []
+        for entity in linked_entities:
+            common_value = common(entity)
+            sightings.append({**sighting(entity), **common_value})
+            indicators.append({**indicator(entity), **common_value})
+
+        return sightings, indicators
 
     def _judgement(self, score, number_of_days_judgements_valid):
         disposition = self._disposition(score)
@@ -170,8 +194,39 @@ class URL(Mapping):
         return 'url'
 
     def extract_judgements(*args, **kwargs):
-        # There is no score to base judgement on.
+        # There is no score to base judgement on - indicators is added instead.
         return []
+
+    def extract_sightings_and_indicators(
+            self, api_linkage_data, report_data,
+            ui_url, number_of_days_indicator_valid
+    ):
+        # ToDo verify with Michael
+        def indicator(category):
+            return {
+                **CTIM_DEFAULTS,
+                'id': transient_id('indicator', category+str(self.observable)),
+                'producer': SOURCE,
+                'type': 'indicator',
+                'valid_time': self._valid_time(number_of_days_indicator_valid),
+                'confidence': 'High',
+                'source': SOURCE,
+                'source_uri': urljoin(ui_url,
+                                      f'/url/{self.observable["value"]}'),
+                'title': category
+            }
+
+        sightings, indicators = super().extract_sightings_and_indicators(
+            api_linkage_data, report_data,
+            ui_url, number_of_days_indicator_valid
+        )
+
+        report_data_indicators = [
+            indicator(name) for name, flag
+            in report_data.get('result', {}).get('cats', {}).items() if flag
+        ]
+
+        return sightings, [*indicators, *report_data_indicators]
 
     @staticmethod
     def _extract_disposition_score(data):

@@ -118,8 +118,8 @@ def xforce_response_success_enrich(secret_key):
             'result': {
                 'url': 'ibm.com',
                 'cats': {
-                    'Software / Hardware': True,
-                    'General Business': True
+                    'Software / Hardware': False,
+                    'General Business': False
                 },
                 'score': 1,
                 'application': {},
