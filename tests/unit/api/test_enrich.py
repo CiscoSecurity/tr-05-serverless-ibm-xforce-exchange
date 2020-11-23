@@ -98,7 +98,7 @@ def test_enrich_call_with_key_error(
         xforce_response_ok, key_error_expected_body
 ):
     with patch('requests.request') as get_mock,\
-            patch('api.enrich.Mapping.extract_verdict') as extract_mock:
+            patch('api.mappings.Domain.extract_verdict') as extract_mock:
         get_mock.return_value = xforce_response_ok
         extract_mock.side_effect = [KeyError('foo')]
 
