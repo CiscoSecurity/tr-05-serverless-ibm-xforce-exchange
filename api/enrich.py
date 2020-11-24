@@ -85,7 +85,8 @@ def observe_observables():
 
     try:
         for observable in observables:
-            mapping = Mapping.for_(observable)
+            refer_link = client.refer_link(ui_url, observable)
+            mapping = Mapping.for_(observable, source_uri=refer_link)
 
             if mapping:
 

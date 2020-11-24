@@ -49,12 +49,12 @@ INDICATOR_DEFAULTS = {
 
 class Mapping(metaclass=ABCMeta):
 
-    def __init__(self, observable, source_uri=None):
+    def __init__(self, observable, source_uri=''):
         self.observable = observable
         self.source_uri = source_uri
 
     @classmethod
-    def for_(cls, observable, source_uri=None):
+    def for_(cls, observable, source_uri=''):
         """Return an instance of `Mapping` for the specified type."""
 
         for subcls in all_subclasses(Mapping):
