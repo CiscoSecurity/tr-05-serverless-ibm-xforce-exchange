@@ -31,6 +31,21 @@ JUDGEMENT = 'judgement'
 SIGHTING = 'sighting'
 INDICATOR = 'indicator'
 
+SIGHTING_DEFAULTS = {
+    **CTIM_DEFAULTS,
+    'confidence': 'High',
+    'count': 1,
+    'type': SIGHTING,
+    'source': SOURCE,
+}
+
+INDICATOR_DEFAULTS = {
+    **CTIM_DEFAULTS,
+    'type': INDICATOR,
+    'confidence': 'High',
+    'source': SOURCE,
+}
+
 
 class Mapping(metaclass=ABCMeta):
 
@@ -73,26 +88,14 @@ class Mapping(metaclass=ABCMeta):
         external_ids = list(external_references_map.keys())
         external_references = list(external_references_map.values())
 
-        def common(entity):
-            external_reference = external_references_map[entity['id']]
-            return {
-                **CTIM_DEFAULTS,
-                'confidence': 'High',
-                'external_ids': external_ids,
-                'external_references': external_references,
-                'source': SOURCE,
-                'source_uri': external_reference['url'],
-            }
-
         def sighting(entity):
             return {
+                **SIGHTING_DEFAULTS,
                 'id': transient_id(SIGHTING, entity['id']),
-                'count': 1,
                 'observed_time': {
                     'start_time': entity['created'],
                     'end_time': entity['created'],
                 },
-                'type': SIGHTING,
                 # Original values: "1owned", "2shared", "3public", "4premier"
                 'internal':
                     entity['category'] == '1owned',
@@ -103,9 +106,9 @@ class Mapping(metaclass=ABCMeta):
 
         def indicator(entity):
             return {
+                **INDICATOR_DEFAULTS,
                 'id': transient_id(INDICATOR, entity['id']),
                 'producer': entity['owner']['name'],
-                'type': INDICATOR,
                 'valid_time': self._valid_time(number_of_days_indicator_valid),
                 'title': entity["title"],
             }
@@ -113,7 +116,13 @@ class Mapping(metaclass=ABCMeta):
         bundle = Bundle()
 
         for entity in linked_entities:
-            common_value = common(entity)
+            external_reference = external_references_map[entity['id']]
+            common_value = {
+                'external_ids': external_ids,
+                'external_references': external_references,
+                'source_uri': external_reference['url'],
+            }
+
             s = {**sighting(entity), **common_value}
             i = {**indicator(entity), **common_value}
             bundle.add(s)
@@ -154,28 +163,21 @@ class Mapping(metaclass=ABCMeta):
     def _sighting(self, category):
         now = time_format(datetime.now())
         return {
-            **CTIM_DEFAULTS,
+            **SIGHTING_DEFAULTS,
             'id': transient_id(SIGHTING, category),
-            'confidence': 'High',
-            'count': 1,
             'observed_time': {'start_time': now, 'end_time': now},
-            'type': SIGHTING,
             'internal': False,
             'observables': [self.observable],
-            'source': SOURCE,
             'source_uri': self.source_uri,
             'title': category,
         }
 
     def _indicator(self, category, number_of_days_indicator_valid, flag=None):
         result = {
-            **CTIM_DEFAULTS,
+            **INDICATOR_DEFAULTS,
             'id': transient_id(INDICATOR, category),
             'producer': SOURCE,
-            'type': INDICATOR,
             'valid_time': self._valid_time(number_of_days_indicator_valid),
-            'confidence': 'High',
-            'source': SOURCE,
             'source_uri': self.source_uri,
             'title': category
         }

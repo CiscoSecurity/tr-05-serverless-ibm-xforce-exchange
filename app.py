@@ -25,7 +25,7 @@ def handle_tr_formatted_error(error):
     return jsonify_result()
 
 
-app.errorhandler(Exception)
+@app.errorhandler(Exception)
 def handle_error(exception):
     app.logger.error(exception)
     code = getattr(exception, 'code', 500)
