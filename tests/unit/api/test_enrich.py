@@ -42,6 +42,9 @@ def test_enrich_call_success(
         if response.get('data') and isinstance(response['data'], dict):
             for s in response['data'].get('verdicts', {}).get('docs', []):
                 assert s.pop('valid_time')
+            for s in response['data'].get('judgements', {}).get('docs', []):
+                assert s.pop('valid_time')
+                assert s.pop('id')
 
         assert response == success_enrich_expected_body
 
@@ -98,7 +101,7 @@ def test_enrich_call_with_key_error(
         xforce_response_ok, key_error_expected_body
 ):
     with patch('requests.request') as get_mock,\
-            patch('api.enrich.Mapping.extract_verdict') as extract_mock:
+            patch('api.mappings.Domain.extract_verdict') as extract_mock:
         get_mock.return_value = xforce_response_ok
         extract_mock.side_effect = [KeyError('foo')]
 

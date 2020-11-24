@@ -117,10 +117,7 @@ def xforce_response_success_enrich(secret_key):
         payload={
             'result': {
                 'url': 'ibm.com',
-                'cats': {
-                    'Software / Hardware': True,
-                    'General Business': True
-                },
+                'cats': {},
                 'score': 1,
                 'application': {},
                 'categoryDescriptions': {
@@ -184,25 +181,42 @@ def ssl_error_expected_body(route, success_enrich_refer_body):
 
 @fixture(scope='module')
 def success_enrich_expected_body(route, success_enrich_refer_body):
-    return expected_body(
-        route,
-        {
-            'data':
+    data = {
+        'data':
+            {
+                'verdicts':
+                    {
+                        'count': 1,
+                        'docs': [
+                            {'disposition': 5,
+                             'disposition_name': 'Unknown',
+                             'observable': {'type': 'domain',
+                                            'value': 'ibm.com'},
+                             'type': 'verdict'}
+                        ]
+                    }
+            }
+    }
+
+    if route.endswith('/observe/observables'):
+        data['data']['judgements'] = {
+            'count': 1,
+            'docs': [
                 {
-                    'verdicts':
-                        {
-                            'count': 1,
-                            'docs': [
-                                {'disposition': 5,
-                                 'disposition_name': 'Unknown',
-                                 'observable': {'type': 'domain',
-                                                'value': 'ibm.com'},
-                                 'type': 'verdict'}
-                            ]
-                        }
-                }
-        },
-        refer_body=success_enrich_refer_body
+                    'confidence': 'High',
+                    'disposition': 5,
+                    'disposition_name': 'Unknown',
+                    'observable': {'type': 'domain', 'value': 'ibm.com'},
+                    'priority': 85,
+                    'schema_version': '1.0.22',
+                    'severity': 'None',
+                    'source': 'IBM X-Force Exchange',
+                    'type': 'judgement'}
+            ]
+        }
+
+    return expected_body(
+        route, data, refer_body=success_enrich_refer_body
     )
 
 
