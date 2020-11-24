@@ -4,6 +4,7 @@ from os import cpu_count
 
 from flask import Blueprint, current_app, g
 
+from api.bundle import Bundle
 from api.client import XForceClient, XFORCE_OBSERVABLE_TYPES
 from api.errors import XForceKeyError
 from api.mappings import Mapping
@@ -13,7 +14,6 @@ from api.utils import (
 )
 
 enrich_api = Blueprint('enrich', __name__)
-
 
 get_observables = partial(get_json, schema=ObservableSchema(many=True))
 
@@ -43,7 +43,7 @@ def deliberate_observables():
         current_app.config['NUMBER_OF_DAYS_VERDICT_IS_VALID']
     )
 
-    g.verdicts = []
+    g.bundle = Bundle()
 
     try:
         with ThreadPoolExecutor(
@@ -51,7 +51,9 @@ def deliberate_observables():
         ) as executor:
             iterator = executor.map(deliberate, observables)
 
-        g.verdicts = [verdict for verdict in iterator if verdict is not None]
+        g.bundle = Bundle(
+            *[verdict for verdict in iterator if verdict is not None]
+        )
 
     except KeyError:
         add_error(XForceKeyError())
@@ -68,6 +70,7 @@ def observe_observables():
                           credentials,
                           current_app.config['USER_AGENT'])
 
+    ui_url = current_app.config['UI_URL']
     number_of_days_verdict_valid = int(
         current_app.config['NUMBER_OF_DAYS_VERDICT_IS_VALID']
     )
@@ -78,43 +81,32 @@ def observe_observables():
         current_app.config['NUMBER_OF_DAYS_INDICATOR_IS_VALID']
     )
 
-    g.verdicts = []
-    g.sightings = []
-    g.judgements = []
-    g.indicators = []
-    g.relationships = []
+    g.bundle = Bundle()
 
     try:
         for observable in observables:
             mapping = Mapping.for_(observable)
 
             if mapping:
+
                 report = client.report(observable)
-
+                report_bundle = Bundle()
                 if report:
-                    verdict = mapping.extract_verdict(
-                        report, number_of_days_verdict_valid
-                    )
-                    if verdict:
-                        g.verdicts.append(verdict)
-
-                    g.judgements.extend(
-                        mapping.extract_judgements(
-                            report, number_of_days_judgement_valid
-                        )
+                    report_bundle = mapping.process_report_data(
+                        report, number_of_days_verdict_valid,
+                        number_of_days_judgement_valid,
+                        number_of_days_indicator_valid
                     )
 
                 api_linkage = client.api_linkage(observable)
+                api_linkage_bundle = Bundle()
                 if api_linkage:
-                    sightings, indicators, relationships = (
-                        mapping.extract_sightings_indicators_relationships(
-                            api_linkage, report, current_app.config['UI_URL'],
-                            number_of_days_indicator_valid
-                        )
+                    api_linkage_bundle = mapping.process_api_linkage(
+                        api_linkage, ui_url, number_of_days_indicator_valid
                     )
-                    g.sightings.extend(sightings)
-                    g.indicators.extend(indicators)
-                    g.relationships.extend(relationships)
+
+                g.bundle.merge(report_bundle)
+                g.bundle.merge(api_linkage_bundle)
 
     except KeyError:
         add_error(XForceKeyError())

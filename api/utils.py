@@ -73,10 +73,6 @@ def get_json(schema):
     return data
 
 
-def format_docs(docs):
-    return {'count': len(docs), 'docs': docs}
-
-
 def jsonify_data(data):
     return jsonify({'data': data})
 
@@ -84,16 +80,8 @@ def jsonify_data(data):
 def jsonify_result():
     result = {'data': {}}
 
-    if g.get('verdicts'):
-        result['data']['verdicts'] = format_docs(g.verdicts)
-    if g.get('judgements'):
-        result['data']['judgements'] = format_docs(g.judgements)
-    if g.get('sightings'):
-        result['data']['sightings'] = format_docs(g.sightings)
-    if g.get('indicators'):
-        result['data']['indicators'] = format_docs(g.indicators)
-    if g.get('relationships'):
-        result['data']['relationships'] = format_docs(g.relationships)
+    if g.get('bundle'):
+        result['data'] = g.bundle.json()
 
     if g.get('errors'):
         result['errors'] = g.errors

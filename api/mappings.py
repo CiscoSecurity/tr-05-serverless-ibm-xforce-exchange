@@ -26,6 +26,11 @@ LOW_SEVERITY = 'Low'
 MEDIUM_SEVERITY = 'Medium'
 HIGH_SEVERITY = 'High'
 
+VERDICT = 'verdict'
+JUDGEMENT = 'judgement'
+SIGHTING = 'sighting'
+INDICATOR = 'indicator'
+
 
 class Mapping(metaclass=ABCMeta):
 
@@ -47,6 +52,10 @@ class Mapping(metaclass=ABCMeta):
     @abstractmethod
     def type(cls):
         """Return the observable type that the mapping is able to process."""
+
+    @abstractmethod
+    def extract_verdict(self, report_data, number_of_days_verdict_valid):
+        """Extract CTIM verdict from X-Force report."""
 
     def process_api_linkage(self, api_linkage_data, ui_url,
                             number_of_days_indicator_valid):
@@ -77,13 +86,13 @@ class Mapping(metaclass=ABCMeta):
 
         def sighting(entity):
             return {
-                'id': transient_id('sighting', entity['id']),
+                'id': transient_id(SIGHTING, entity['id']),
                 'count': 1,
                 'observed_time': {
                     'start_time': entity['created'],
                     'end_time': entity['created'],
                 },
-                'type': 'sighting',
+                'type': SIGHTING,
                 # Original values: "1owned", "2shared", "3public", "4premier"
                 'internal':
                     entity['category'] == '1owned',
@@ -94,30 +103,24 @@ class Mapping(metaclass=ABCMeta):
 
         def indicator(entity):
             return {
-                'id': transient_id('indicator', entity['id']),
+                'id': transient_id(INDICATOR, entity['id']),
                 'producer': entity['owner']['name'],
-                'type': 'indicator',
+                'type': INDICATOR,
                 'valid_time': self._valid_time(number_of_days_indicator_valid),
                 'title': entity["title"],
             }
 
-        sightings = []
-        indicators = []
-        relationships = []
+        bundle = Bundle()
 
         for entity in linked_entities:
             common_value = common(entity)
             s = {**sighting(entity), **common_value}
             i = {**indicator(entity), **common_value}
-            sightings.append(s)
-            indicators.append(i)
-            relationships.append(self._relationship(s, i, 'member-of'))
+            bundle.add(s)
+            bundle.add(i)
+            bundle.add(self._relationship(s, i, 'member-of'))
 
-        return Bundle(*sightings, *indicators, *relationships)
-
-    @abstractmethod
-    def extract_verdict(self, report_data, number_of_days_verdict_valid):
-        pass
+        return bundle
 
     def _verdict(self, score, number_of_days_verdict_valid):
         disposition = self._disposition(score)
@@ -125,7 +128,7 @@ class Mapping(metaclass=ABCMeta):
         return {
             'disposition': disposition,
             'observable': self.observable,
-            'type': 'verdict',
+            'type': VERDICT,
             'valid_time':
                 self._valid_time(number_of_days_verdict_valid),
             'disposition_name': DISPOSITION_NAME_MAP[disposition],
@@ -136,7 +139,7 @@ class Mapping(metaclass=ABCMeta):
 
         return {
             **CTIM_DEFAULTS,
-            'id': transient_id('judgement'),
+            'id': transient_id(JUDGEMENT),
             'confidence': 'High',
             'disposition': disposition,
             'disposition_name': DISPOSITION_NAME_MAP[disposition],
@@ -144,7 +147,7 @@ class Mapping(metaclass=ABCMeta):
             'priority': 85,
             'severity': self._severity(score),
             'source': SOURCE,
-            'type': 'judgement',
+            'type': JUDGEMENT,
             'valid_time': self._valid_time(number_of_days_judgements_valid)
         }
 
@@ -152,11 +155,11 @@ class Mapping(metaclass=ABCMeta):
         now = time_format(datetime.now())
         return {
             **CTIM_DEFAULTS,
-            'id': transient_id('sighting', category),
+            'id': transient_id(SIGHTING, category),
             'confidence': 'High',
             'count': 1,
             'observed_time': {'start_time': now, 'end_time': now},
-            'type': 'sighting',
+            'type': SIGHTING,
             'internal': False,
             'observables': [self.observable],
             'source': SOURCE,
@@ -167,9 +170,9 @@ class Mapping(metaclass=ABCMeta):
     def _indicator(self, category, number_of_days_indicator_valid, flag=None):
         result = {
             **CTIM_DEFAULTS,
-            'id': transient_id('indicator', category),
+            'id': transient_id(INDICATOR, category),
             'producer': SOURCE,
-            'type': 'indicator',
+            'type': INDICATOR,
             'valid_time': self._valid_time(number_of_days_indicator_valid),
             'confidence': 'High',
             'source': SOURCE,
@@ -232,23 +235,21 @@ class URL(Mapping):
     def type(cls):
         return 'url'
 
+    def extract_verdict(self, report_data, number_of_days_verdict_valid):
+        return self._verdict(report_data.get('result', {}).get('score'),
+                             number_of_days_verdict_valid)
+
     def process_report_data(self, report_data,
                             number_of_days_verdict_valid,
                             number_of_days_judgement_valid,
                             number_of_days_indicator_valid):
+        bundle = Bundle()
 
-        verdict = self.extract_verdict(report_data,
-                                       number_of_days_verdict_valid)
+        bundle.add(self.extract_verdict(report_data,
+                                        number_of_days_verdict_valid))
 
-        judgements = [
-            self._judgement(
-                report_data['result']['score'], number_of_days_judgement_valid
-            )
-        ]
-
-        sightings = []
-        indicators = []
-        relationships = []
+        bundle.add(self._judgement(report_data['result']['score'],
+                                   number_of_days_judgement_valid))
 
         for category, flag in report_data.get('result',
                                               {}).get('cats', {}).items():
@@ -256,21 +257,15 @@ class URL(Mapping):
             i = self._indicator(
                 category, number_of_days_indicator_valid, flag=flag
             )
-            sightings.append(s)
-            indicators.append(i)
-            relationships.append(self._relationship(s, i, 'sighting-of'))
+            bundle.add(s)
+            bundle.add(i)
+            bundle.add(self._relationship(s, i, 'sighting-of'))
 
-        return Bundle(verdict, *judgements, *sightings, *indicators, *relationships)
-
-    def extract_verdict(self, report_data, number_of_days_verdict_valid):
-        return self._verdict(report_data.get('result', {}).get('score'),
-                             number_of_days_verdict_valid)
-
-
+        return bundle
 
     @staticmethod
     def _severity(score):
-        pass
+        return NONE_SEVERITY
 
 
 class Domain(URL):
@@ -284,35 +279,33 @@ class IP(Mapping):
     def type(cls):
         return 'ip'
 
+    def extract_verdict(self, report_data, number_of_days_verdict_valid):
+        return self._verdict(report_data.get('score'),
+                             number_of_days_verdict_valid)
+
     def process_report_data(self, report_data,
                             number_of_days_verdict_valid,
                             number_of_days_judgement_valid,
                             number_of_days_indicator_valid):
-        verdict = self.extract_verdict(report_data,
-                                       number_of_days_verdict_valid)
 
-        sightings = []
-        indicators = []
-        judgements = []
-        relationships = []
+        bundle = Bundle()
+
+        bundle.add(self.extract_verdict(report_data,
+                                        number_of_days_verdict_valid))
 
         for category, score in report_data.get('cats', {}).items():
-            s = self._sighting(category)
-            i = self._indicator(category, number_of_days_indicator_valid)
-            j = self._judgement(score / 10, number_of_days_judgement_valid)
-            sightings.append(s)
-            indicators.append(i)
-            judgements.append(j)
-            relationships.append(self._relationship(s, j, 'based-on'))
-            relationships.append(self._relationship(j, i, 'based-on'))
+            sighting = self._sighting(category)
+            indicator = self._indicator(category,
+                                        number_of_days_indicator_valid)
+            judgement = self._judgement(score / 10,
+                                        number_of_days_judgement_valid)
+            bundle.add(sighting)
+            bundle.add(indicator)
+            bundle.add(judgement)
+            bundle.add(self._relationship(sighting, judgement, 'based-on'))
+            bundle.add(self._relationship(judgement, indicator, 'based-on'))
 
-        return Bundle(
-            verdict, *judgements, *sightings, *indicators, *relationships
-        )
-
-    def extract_verdict(self, report_data, number_of_days_verdict_valid):
-        return self._verdict(report_data.get('score'),
-                             number_of_days_verdict_valid)
+        return bundle
 
     @staticmethod
     def _severity(score):
@@ -343,17 +336,19 @@ class FileHash(Mapping, ABC):
             number_of_days_verdict_valid=None,
         )
 
-    def process_report_data(self, report_data,
-                            number_of_days_verdict_valid,
-                            number_of_days_judgement_valid):
+    def process_report_data(
+            self, report_data, number_of_days_verdict_valid,
+            number_of_days_judgement_valid, *args
+    ):
 
-        verdict = self.extract_verdict(report_data,
-                                       number_of_days_verdict_valid)
+        bundle = Bundle()
+        bundle.add(self.extract_verdict(report_data,
+                                        number_of_days_verdict_valid))
 
-        j = self._judgement(report_data.get('malware', {}).get('risk'),
-                      number_of_days_judgement_valid)
+        bundle.add(self._judgement(report_data.get('malware', {}).get('risk'),
+                                   number_of_days_judgement_valid))
 
-        return Bundle(verdict, j)
+        return bundle
 
     @staticmethod
     def _disposition(score):

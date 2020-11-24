@@ -42,6 +42,9 @@ def test_enrich_call_success(
         if response.get('data') and isinstance(response['data'], dict):
             for s in response['data'].get('verdicts', {}).get('docs', []):
                 assert s.pop('valid_time')
+            for s in response['data'].get('judgements', {}).get('docs', []):
+                assert s.pop('valid_time')
+                assert s.pop('id')
 
         assert response == success_enrich_expected_body
 
