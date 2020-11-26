@@ -13,6 +13,12 @@ class Bundle:
         entity_type = entity['type'] + 's'
         self._entities_by_type[entity_type].append(entity)
 
+    def get(self, entity_type):
+        entity_type = entity_type + 's'
+        if entity_type not in self._entities_by_type:
+            return []
+        return self._entities_by_type[entity_type]
+
     @staticmethod
     def _format_docs(docs):
         return {'count': len(docs), 'docs': docs}

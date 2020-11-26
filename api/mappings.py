@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod, ABC
 from datetime import datetime, timedelta
+from operator import itemgetter
 from urllib.parse import urljoin
 
 from api.bundle import Bundle
@@ -72,8 +73,15 @@ class Mapping(metaclass=ABCMeta):
     def extract_verdict(self, report_data, number_of_days_verdict_valid):
         """Extract CTIM verdict from X-Force report."""
 
+    @abstractmethod
+    def process_report_data(self, report_data,
+                            number_of_days_verdict_valid,
+                            number_of_days_judgement_valid,
+                            number_of_days_indicator_valid, limit):
+        """Extract CTIM entities from X-Force report."""
+
     def process_api_linkage(self, api_linkage_data, ui_url,
-                            number_of_days_indicator_valid):
+                            number_of_days_indicator_valid, limit):
 
         linked_entities = api_linkage_data.get('linkedEntities', [])
 
@@ -113,8 +121,11 @@ class Mapping(metaclass=ABCMeta):
                 'title': entity["title"],
             }
 
-        bundle = Bundle()
+        linked_entities = sorted(
+            linked_entities, key=itemgetter('created'), reverse=True
+        )[:limit]
 
+        bundle = Bundle()
         for entity in linked_entities:
             external_reference = external_references_map[entity['id']]
             common_value = {
@@ -244,7 +255,7 @@ class URL(Mapping):
     def process_report_data(self, report_data,
                             number_of_days_verdict_valid,
                             number_of_days_judgement_valid,
-                            number_of_days_indicator_valid):
+                            number_of_days_indicator_valid, limit):
         bundle = Bundle()
 
         bundle.add(self.extract_verdict(report_data,
@@ -253,8 +264,10 @@ class URL(Mapping):
         bundle.add(self._judgement(report_data['result']['score'],
                                    number_of_days_judgement_valid))
 
-        for category, flag in report_data.get('result',
-                                              {}).get('cats', {}).items():
+        categories = report_data.get('result', {}).get('cats', {})
+        categories = sorted(categories.items())[:limit]
+
+        for category, flag in categories:
             s = self._sighting(category)
             i = self._indicator(
                 category, number_of_days_indicator_valid, flag=flag
@@ -288,14 +301,15 @@ class IP(Mapping):
     def process_report_data(self, report_data,
                             number_of_days_verdict_valid,
                             number_of_days_judgement_valid,
-                            number_of_days_indicator_valid):
+                            number_of_days_indicator_valid, limit):
 
         bundle = Bundle()
 
         bundle.add(self.extract_verdict(report_data,
                                         number_of_days_verdict_valid))
 
-        for category, score in report_data.get('cats', {}).items():
+        categories = sorted(report_data.get('cats', {}).items())[:limit]
+        for category, score in categories:
             sighting = self._sighting(category)
             indicator = self._indicator(category,
                                         number_of_days_indicator_valid)

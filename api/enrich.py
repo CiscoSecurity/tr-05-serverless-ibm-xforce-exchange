@@ -7,7 +7,7 @@ from flask import Blueprint, current_app, g
 from api.bundle import Bundle
 from api.client import XForceClient, XFORCE_OBSERVABLE_TYPES
 from api.errors import XForceKeyError
-from api.mappings import Mapping
+from api.mappings import Mapping, SIGHTING
 from api.schemas import ObservableSchema
 from api.utils import (
     get_json, jsonify_data, get_credentials, jsonify_result, add_error
@@ -80,6 +80,7 @@ def observe_observables():
     number_of_days_indicator_valid = int(
         current_app.config['NUMBER_OF_DAYS_INDICATOR_IS_VALID']
     )
+    limit = current_app.config['CTR_ENTITIES_LIMIT']
 
     g.bundle = Bundle()
 
@@ -96,14 +97,15 @@ def observe_observables():
                     report_bundle = mapping.process_report_data(
                         report, number_of_days_verdict_valid,
                         number_of_days_judgement_valid,
-                        number_of_days_indicator_valid
+                        number_of_days_indicator_valid, limit
                     )
 
                 api_linkage = client.api_linkage(observable)
                 api_linkage_bundle = Bundle()
                 if api_linkage:
                     api_linkage_bundle = mapping.process_api_linkage(
-                        api_linkage, ui_url, number_of_days_indicator_valid
+                        api_linkage, ui_url, number_of_days_indicator_valid,
+                        limit-len(report_bundle.get(SIGHTING))
                     )
 
                 g.bundle.merge(report_bundle)
