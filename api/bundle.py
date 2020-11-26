@@ -15,6 +15,8 @@ class Bundle:
 
     def get(self, entity_type):
         entity_type = entity_type + 's'
+        if entity_type not in self._entities_by_type:
+            return []
         return self._entities_by_type[entity_type]
 
     @staticmethod
