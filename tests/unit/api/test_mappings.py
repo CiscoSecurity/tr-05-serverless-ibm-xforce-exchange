@@ -68,7 +68,7 @@ def test_process_api_linkage(input_data):
             data['process_api_linkage']['input'],
             'https://exchange', number_of_days_valid, 100
         )
-        
+
         check_bundle(result, data['process_api_linkage']['output'])
 
 
@@ -102,8 +102,8 @@ def test_mapping_for_():
     assert isinstance(Mapping.for_({'type': 'sha1'}), SHA1)
     assert isinstance(Mapping.for_({'type': 'sha256'}), SHA256)
     assert Mapping.for_({'type': 'whatever'}) is None
-    
-    
+
+
 def check_bundle(
         bundle, expected_result, number_of_days_valid=3
 ):

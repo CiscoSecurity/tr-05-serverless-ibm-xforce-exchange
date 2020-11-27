@@ -111,7 +111,7 @@ def xforce_response_ok(secret_key):
 
 
 @fixture(scope='session')
-def xforce_response_success_enrich(secret_key):
+def xforce_response_success_enrich_report(secret_key):
     return xforce_api_response_mock(
         HTTPStatus.OK,
         payload={
@@ -126,6 +126,57 @@ def xforce_response_success_enrich(secret_key):
                 }
             },
             'tags': []
+        }
+    )
+
+
+@fixture(scope='session')
+def xforce_response_success_enrich_api_linkage(secret_key):
+    return xforce_api_response_mock(
+        HTTPStatus.OK,
+        payload={
+            "linkedEntities": [
+                {
+                    "title": "WannaCry",
+                    "created": "2020-01-31T19:42:53.350Z",
+                    "shared": "public",
+                    "category": "3public",
+                    "owner": {
+                        "name": "Jane Ginn",
+                        "userid": "http://www.ibm.com/310000EQ3H",
+                        "isDisabled": False
+                    },
+                    "id": "62eece6bd7e7399a7366cd5d8e910182",
+                    "iocs": {
+                        "MAL": 275,
+                        "BOT": 4,
+                        "IP": 7,
+                        "VUL": 2,
+                        "URL": 1
+                    },
+                    "type": "casefile"
+                },
+                {
+                    "title": "WCry2 Ransomware Outbreak",
+                    "created": "2017-05-30T15:29:21.215Z",
+                    "shared": "public",
+                    "category": "3public",
+                    "owner": {
+                        "name": "Nick Bradley",
+                        "userid": "http://www.ibm.com/2700039SGG",
+                        "verified": "iris",
+                        "isDisabled": False
+                    },
+                    "id": "8b186bc4459380a5606c322ee20c7729",
+                    "iocs": {
+                        "MAL": 509,
+                        "URL": 65,
+                        "IP": 37,
+                        "file": 7
+                    },
+                    "type": "casefile"
+                }
+            ]
         }
     )
 
@@ -181,38 +232,229 @@ def ssl_error_expected_body(route, success_enrich_refer_body):
 
 @fixture(scope='module')
 def success_enrich_expected_body(route, success_enrich_refer_body):
-    data = {
-        'data':
+    verdicts = {
+        'verdicts':
             {
-                'verdicts':
-                    {
-                        'count': 1,
-                        'docs': [
-                            {'disposition': 5,
-                             'disposition_name': 'Unknown',
-                             'observable': {'type': 'domain',
-                                            'value': 'ibm.com'},
-                             'type': 'verdict'}
-                        ]
-                    }
+                'count': 1,
+                'docs': [
+                    {'disposition': 5,
+                     'disposition_name': 'Unknown',
+                     'observable': {'type': 'domain',
+                                    'value': 'ibm.com'},
+                     'type': 'verdict'}
+                ]
             }
     }
+    data = {'data': verdicts}
 
     if route.endswith('/observe/observables'):
-        data['data']['judgements'] = {
-            'count': 1,
-            'docs': [
-                {
-                    'confidence': 'High',
-                    'disposition': 5,
-                    'disposition_name': 'Unknown',
-                    'observable': {'type': 'domain', 'value': 'ibm.com'},
-                    'priority': 85,
-                    'schema_version': '1.0.22',
-                    'severity': 'None',
-                    'source': 'IBM X-Force Exchange',
-                    'type': 'judgement'}
-            ]
+        data = {
+            "data": {
+                "indicators": {
+                    "count": 2,
+                    "docs": [
+                        {
+                            "confidence": "High",
+                            "external_ids": [
+                                "62eece6bd7e7399a7366cd5d8e910182",
+                                "8b186bc4459380a5606c322ee20c7729"
+                            ],
+                            "external_references": [
+                                {
+                                    "external_id":
+                                        "62eece6bd7e7399a7366cd5d8e910182",
+                                    "source_name": "IBM X-Force Exchange",
+                                    "url":
+                                        "https://exchange.xforce.ibmcloud.com/"
+                                        "collection/WannaCry-62eece6bd7e7399a7"
+                                        "366cd5d8e910182"
+                                },
+                                {
+                                    "external_id":
+                                        "8b186bc4459380a5606c322ee20c7729",
+                                    "source_name": "IBM X-Force Exchange",
+                                    "url":
+                                        "https://exchange.xforce.ibmcloud.com/"
+                                        "collection/WCry2 Ransomware Outbreak-"
+                                        "8b186bc4459380a5606c322ee20c7729"
+                                }
+                            ],
+                            "producer": "Jane Ginn",
+                            "schema_version": "1.0.22",
+                            "source": "IBM X-Force Exchange",
+                            "source_uri":
+                                "https://exchange.xforce.ibmcloud.com/"
+                                "collection/"
+                                "WannaCry-62eece6bd7e7399a7366cd5d8e910182",
+                            "title": "WannaCry",
+                            "type": "indicator"
+                        },
+                        {
+                            "confidence": "High",
+                            "external_ids": [
+                                "62eece6bd7e7399a7366cd5d8e910182",
+                                "8b186bc4459380a5606c322ee20c7729"
+                            ],
+                            "external_references": [
+                                {
+                                    "external_id":
+                                        "62eece6bd7e7399a7366cd5d8e910182",
+                                    "source_name": "IBM X-Force Exchange",
+                                    "url":
+                                        "https://exchange.xforce.ibmcloud.com/"
+                                        "collection/WannaCry-"
+                                        "62eece6bd7e7399a7366cd5d8e910182"
+                                },
+                                {
+                                    "external_id":
+                                        "8b186bc4459380a5606c322ee20c7729",
+                                    "source_name": "IBM X-Force Exchange",
+                                    "url":
+                                        "https://exchange.xforce.ibmcloud.com/"
+                                        "collection/WCry2 Ransomware Outbreak-"
+                                        "8b186bc4459380a5606c322ee20c7729"
+                                }
+                            ],
+                            "producer": "Nick Bradley",
+                            "schema_version": "1.0.22",
+                            "source": "IBM X-Force Exchange",
+                            "source_uri":
+                                "https://exchange.xforce.ibmcloud.com/"
+                                "collection/WCry2 Ransomware Outbreak-"
+                                "8b186bc4459380a5606c322ee20c7729",
+                            "title": "WCry2 Ransomware Outbreak",
+                            "type": "indicator"
+                        }
+                    ]
+                },
+                "judgements": {
+                    "count": 1,
+                    "docs": [
+                        {
+                            "confidence": "High",
+                            "disposition": 5,
+                            "disposition_name": "Unknown",
+                            "observable": {
+                                "type": "domain",
+                                "value": "ibm.com"
+                            },
+                            "priority": 85,
+                            "schema_version": "1.0.22",
+                            "severity": "None",
+                            "source": "IBM X-Force Exchange",
+                            "type": "judgement"
+                        }
+                    ]
+                },
+                "relationships": {
+                    "count": 2,
+                    "docs": [
+                        {
+                            "relationship_type": "member-of",
+                            "schema_version": "1.0.22",
+                            "type": "relationship"
+                        },
+                        {
+                            "relationship_type": "member-of",
+                            "schema_version": "1.0.22",
+                            "type": "relationship"
+                        }
+                    ]
+                },
+                "sightings": {
+                    "count": 2,
+                    "docs": [
+                        {
+                            "confidence": "High",
+                            "count": 1,
+                            "external_ids": [
+                                "62eece6bd7e7399a7366cd5d8e910182",
+                                "8b186bc4459380a5606c322ee20c7729"
+                            ],
+                            "external_references": [
+                                {
+                                    "external_id":
+                                        "62eece6bd7e7399a7366cd5d8e910182",
+                                    "source_name": "IBM X-Force Exchange",
+                                    "url":
+                                        "https://exchange.xforce.ibmcloud.com/"
+                                        "collection/WannaCry-"
+                                        "62eece6bd7e7399a7366cd5d8e910182"
+                                },
+                                {
+                                    "external_id":
+                                        "8b186bc4459380a5606c322ee20c7729",
+                                    "source_name": "IBM X-Force Exchange",
+                                    "url":
+                                        "https://exchange.xforce.ibmcloud.com/"
+                                        "collection/WCry2 Ransomware Outbreak-"
+                                        "8b186bc4459380a5606c322ee20c7729"
+                                }
+                            ],
+                            "internal": False,
+                            "observables": [
+                                {
+                                    "type": "domain",
+                                    "value": "ibm.com"
+                                }
+                            ],
+                            "schema_version": "1.0.22",
+                            "source": "IBM X-Force Exchange",
+                            "source_uri":
+                                "https://exchange.xforce.ibmcloud.com/"
+                                "collection/WannaCry-"
+                                "62eece6bd7e7399a7366cd5d8e910182",
+                            "title": "Contained in Collection: WannaCry",
+                            "type": "sighting"
+                        },
+                        {
+                            "confidence": "High",
+                            "count": 1,
+                            "external_ids": [
+                                "62eece6bd7e7399a7366cd5d8e910182",
+                                "8b186bc4459380a5606c322ee20c7729"
+                            ],
+                            "external_references": [
+                                {
+                                    "external_id":
+                                        "62eece6bd7e7399a7366cd5d8e910182",
+                                    "source_name": "IBM X-Force Exchange",
+                                    "url":
+                                        "https://exchange.xforce.ibmcloud.com/"
+                                        "collection/WannaCry-"
+                                        "62eece6bd7e7399a7366cd5d8e910182"
+                                },
+                                {
+                                    "external_id":
+                                        "8b186bc4459380a5606c322ee20c7729",
+                                    "source_name": "IBM X-Force Exchange",
+                                    "url":
+                                        "https://exchange.xforce.ibmcloud.com/"
+                                        "collection/WCry2 Ransomware Outbreak-"
+                                        "8b186bc4459380a5606c322ee20c7729"
+                                }
+                            ],
+                            "internal": False,
+                            "observables": [
+                                {
+                                    "type": "domain",
+                                    "value": "ibm.com"
+                                }
+                            ],
+                            "schema_version": "1.0.22",
+                            "source": "IBM X-Force Exchange",
+                            "source_uri":
+                                "https://exchange.xforce.ibmcloud.com/"
+                                "collection/WCry2 Ransomware Outbreak-"
+                                "8b186bc4459380a5606c322ee20c7729",
+                            "title": "Contained in Collection: "
+                                     "WCry2 Ransomware Outbreak",
+                            "type": "sighting"
+                        }
+                    ]
+                },
+                **verdicts
+            }
         }
 
     return expected_body(

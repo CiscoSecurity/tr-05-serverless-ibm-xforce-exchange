@@ -25,10 +25,13 @@ def valid_json():
 
 def test_enrich_call_success(
         route, client, valid_jwt, valid_json,
-        xforce_response_success_enrich, success_enrich_expected_body
+        xforce_response_success_enrich_report,
+        xforce_response_success_enrich_api_linkage,
+        success_enrich_expected_body
 ):
     with patch('requests.request') as get_mock:
-        get_mock.return_value = xforce_response_success_enrich
+        get_mock.side_effect = [xforce_response_success_enrich_report,
+                                xforce_response_success_enrich_api_linkage]
 
         response = client.post(
             route, headers=headers(valid_jwt), json=valid_json
@@ -40,11 +43,13 @@ def test_enrich_call_success(
         assert response.get('errors') is None
 
         if response.get('data') and isinstance(response['data'], dict):
-            for s in response['data'].get('verdicts', {}).get('docs', []):
-                assert s.pop('valid_time')
-            for s in response['data'].get('judgements', {}).get('docs', []):
-                assert s.pop('valid_time')
-                assert s.pop('id')
+            for _, entity_list in response['data'].items():
+                for doc in entity_list['docs']:
+                    doc.pop('valid_time', None)
+                    doc.pop('observed_time', None)
+                    doc.pop('id', None)
+                    doc.pop('source_ref', None)
+                    doc.pop('target_ref', None)
 
         assert response == success_enrich_expected_body
 
@@ -112,3 +117,19 @@ def test_enrich_call_with_key_error(
 
         assert response.status_code == HTTPStatus.OK
         assert response.json == key_error_expected_body
+
+
+@fixture(scope='module')
+def invalid_json():
+    return [{'type': 'domain'}]
+
+
+def test_enrich_call_with_invalid_json(
+        route, client, valid_jwt, invalid_json, invalid_json_expected_body,
+):
+    response = client.post(
+        route, headers=headers(valid_jwt), json=invalid_json
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json == invalid_json_expected_body
