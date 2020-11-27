@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 from authlib.jose import jwt
 from pytest import fixture
 
-from api.errors import UNKNOWN
+from api.errors import UNKNOWN, INVALID_ARGUMENT
 from app import app
 
 
@@ -131,8 +131,8 @@ def xforce_response_success_enrich(secret_key):
 
 
 def expected_body(r, body, refer_body=None):
-    if r.endswith('/refer/observables'):
-        return refer_body if refer_body is not None else {'data': []}
+    if r.endswith('/refer/observables') and refer_body is not None:
+        return refer_body
 
     return body
 
@@ -249,4 +249,23 @@ def key_error_expected_body(route, success_enrich_refer_body):
                 }
             ]
         },
-        refer_body=success_enrich_refer_body)
+        refer_body=success_enrich_refer_body
+    )
+
+
+@fixture(scope='module')
+def invalid_json_expected_body(route):
+    return expected_body(
+        route,
+        {
+            'errors': [
+                {
+                    'code': INVALID_ARGUMENT,
+                    'message':
+                        'Invalid JSON payload received. {"0": {"value": '
+                        '["Missing data for required field."]}}',
+                    'type': 'fatal'
+                }
+            ]
+        }
+    )
