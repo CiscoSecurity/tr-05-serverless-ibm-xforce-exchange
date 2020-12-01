@@ -45,29 +45,52 @@ def input_data(request):
     return request.param
 
 
-def test_extract_verdict(input_data):
+def test_process_report_data(input_data):
     with open('tests/unit/data/' + input_data.file) as file:
         data = json.load(file)
-        number_of_days_verdict_valid = 3
+        number_of_days_valid = 3
 
-        result = input_data.mapping.extract_verdict(
-            data['input'], number_of_days_verdict_valid)
-
-        start_time = datetime.now()
-        assert result['valid_time']['start_time'].startswith(
-            start_time.isoformat(timespec="minutes")
+        result = input_data.mapping.process_report_data(
+            data['process_report_data']['input'],
+            number_of_days_valid, number_of_days_valid, number_of_days_valid,
+            100
         )
 
-        if input_data.file in ('md5.json',  'sha1.json',  'sha256.json'):
-            end_time = datetime(2525, 1, 1)
-        else:
-            end_time = start_time + timedelta(number_of_days_verdict_valid)
+        check_bundle(result, data['process_report_data']['output'])
 
-        assert result.pop('valid_time')['end_time'].startswith(
-                end_time.isoformat(timespec="minutes")
+
+def test_process_api_linkage(input_data):
+    with open('tests/unit/data/' + input_data.file) as file:
+        data = json.load(file)
+        number_of_days_valid = 3
+
+        result = input_data.mapping.process_api_linkage(
+            data['process_api_linkage']['input'],
+            'https://exchange', number_of_days_valid, 100
+        )
+
+        check_bundle(result, data['process_api_linkage']['output'])
+
+
+def test_limit(input_data):
+    with open('tests/unit/data/' + input_data.file) as file:
+        data = json.load(file)
+        number_of_days_valid = 3
+
+        for limit in (1, 2, 5):
+            results = input_data.mapping.process_api_linkage(
+                data['process_api_linkage']['input'],
+                'https://exchange', number_of_days_valid, limit
             )
+            check_bundle_len(results, limit)
 
-        assert result == data['output']
+            results = input_data.mapping.process_report_data(
+                data['process_report_data']['input'],
+                number_of_days_valid, number_of_days_valid,
+                number_of_days_valid,
+                limit
+            )
+            check_bundle_len(results, limit)
 
 
 def test_mapping_for_():
@@ -79,3 +102,66 @@ def test_mapping_for_():
     assert isinstance(Mapping.for_({'type': 'sha1'}), SHA1)
     assert isinstance(Mapping.for_({'type': 'sha256'}), SHA256)
     assert Mapping.for_({'type': 'whatever'}) is None
+
+
+def check_bundle(
+        bundle, expected_result, number_of_days_valid=3
+):
+    def check_and_pop_time(entity, time_field_name, end_time=None):
+        assert entity[time_field_name]['start_time'].startswith(
+            start_time.isoformat(timespec="minutes")
+        )
+        if end_time is None:
+            end_time = start_time + timedelta(number_of_days_valid)
+
+        assert entity.pop(time_field_name)['end_time'].startswith(
+            end_time.isoformat(timespec="minutes")
+        )
+
+    def check_and_pop_id(entity):
+        assert entity.pop('id').startswith(f'transient:{entity["type"]}-')
+
+    start_time = datetime.now()
+    result = dict(bundle._entities_by_type)
+
+    for verdict in result.get('verdicts', []):
+        end_time = None
+        if verdict['observable']['type'] in ('md5', 'sha1', 'sha256'):
+            end_time = datetime(2525, 1, 1)
+
+        check_and_pop_time(verdict, 'valid_time', end_time=end_time)
+
+    for judgement in result.get('judgements', []):
+        check_and_pop_id(judgement)
+        check_and_pop_time(judgement, 'valid_time')
+
+    for sighting in result.get('sightings', []):
+        check_and_pop_id(sighting)
+        if not expected_result['sightings'][0].get('observed_time'):
+            check_and_pop_time(sighting, 'observed_time', end_time=start_time)
+
+    for indicator in result.get('indicators', []):
+        check_and_pop_id(indicator)
+        check_and_pop_time(indicator, 'valid_time')
+
+    for relation in result.get('relationships', []):
+        check_and_pop_id(relation)
+        source_ref = relation.pop('source_ref')
+        target_ref = relation.pop('target_ref')
+
+        assert (source_ref.startswith('transient:sighting-')
+                or source_ref.startswith('transient:judgement-'))
+        assert (target_ref.startswith('transient:indicator-')
+                or target_ref.startswith('transient:judgement-'))
+        assert source_ref != target_ref
+
+    assert result == expected_result
+
+
+def check_bundle_len(bundle, limit):
+    result = dict(bundle._entities_by_type)
+    result.pop('verdicts', None)
+    result.pop('relationships', None)
+
+    for entity_type, entities in result.items():
+        assert len(entities) <= limit

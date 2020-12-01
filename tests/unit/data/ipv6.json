@@ -1,19 +1,309 @@
 {
-  "input": {
+  "process_report_data": {
+    "input": {
       "ip": "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
       "history": [],
       "subnets": [],
-      "cats": {},
+      "cats": {
+        "Spam": 43,
+        "IT": 12
+      },
       "score": 6.9,
       "tags": []
     },
-  "output": {
-    "type": "verdict",
-    "observable": {
-      "value": "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
-      "type": "ipv6"
-    },
-    "disposition": 3,
-    "disposition_name": "Suspicious"
+    "output": {
+      "verdicts": [
+        {
+          "disposition": 3,
+          "observable": {
+            "type": "ipv6",
+            "value": "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+          },
+          "type": "verdict",
+          "disposition_name": "Suspicious"
+        }
+      ],
+      "sightings": [
+        {
+          "schema_version": "1.0.22",
+          "confidence": "High",
+          "count": 1,
+          "type": "sighting",
+          "source": "IBM X-Force Exchange",
+          "internal": false,
+          "observables": [
+            {
+              "type": "ipv6",
+              "value": "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+            }
+          ],
+          "source_uri": "",
+          "title": "IT"
+        },
+        {
+          "schema_version": "1.0.22",
+          "confidence": "High",
+          "count": 1,
+          "type": "sighting",
+          "source": "IBM X-Force Exchange",
+          "internal": false,
+          "observables": [
+            {
+              "type": "ipv6",
+              "value": "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+            }
+          ],
+          "source_uri": "",
+          "title": "Spam"
+        }
+      ],
+      "indicators": [
+        {
+          "schema_version": "1.0.22",
+          "type": "indicator",
+          "confidence": "High",
+          "source": "IBM X-Force Exchange",
+          "producer": "IBM X-Force Exchange",
+          "source_uri": "",
+          "title": "IT"
+        },
+        {
+          "schema_version": "1.0.22",
+          "type": "indicator",
+          "confidence": "High",
+          "source": "IBM X-Force Exchange",
+          "producer": "IBM X-Force Exchange",
+          "source_uri": "",
+          "title": "Spam"
+        }
+      ],
+      "judgements": [
+        {
+          "schema_version": "1.0.22",
+          "confidence": "High",
+          "disposition": 5,
+          "disposition_name": "Unknown",
+          "observable": {
+            "type": "ipv6",
+            "value": "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+          },
+          "priority": 85,
+          "severity": "Low",
+          "source": "IBM X-Force Exchange",
+          "type": "judgement"
+        },
+        {
+          "schema_version": "1.0.22",
+          "confidence": "High",
+          "disposition": 3,
+          "disposition_name": "Suspicious",
+          "observable": {
+            "type": "ipv6",
+            "value": "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+          },
+          "priority": 85,
+          "severity": "Medium",
+          "source": "IBM X-Force Exchange",
+          "type": "judgement"
+        }
+      ],
+      "relationships": [
+        {
+          "schema_version": "1.0.22",
+          "type": "relationship",
+          "relationship_type": "based-on"
+        },
+        {
+          "schema_version": "1.0.22",
+          "type": "relationship",
+          "relationship_type": "based-on"
+        },
+        {
+          "schema_version": "1.0.22",
+          "type": "relationship",
+          "relationship_type": "based-on"
+        },
+        {
+          "schema_version": "1.0.22",
+          "type": "relationship",
+          "relationship_type": "based-on"
+        }
+      ]
+    }
+  },
+  "process_api_linkage": {
+    "input": {
+      "linkedEntities": [
+          {
+              "title": "Phishing & Spam",
+              "created": "2020-11-17T02:37:31.837Z",
+              "shared": "public",
+              "category": "3public",
+              "owner": {
+                  "name": "Jonas Winzen (IBM)",
+                  "userid": "http://www.ibm.com/310000H63N",
+                  "verified": "ibmexpert",
+                  "isDisabled": false
+              },
+              "id": "0777fb2ca2d2a93ccc01e1325b206c98",
+              "iocs": {},
+              "type": "casefile"
+          },
+          {
+              "title": "NVSP_2019-04-11",
+              "created": "2019-06-13T01:24:28.409Z",
+              "shared": "public",
+              "category": "3public",
+              "owner": {
+                  "name": "Er. Tapan Jatakia",
+                  "userid": "http://www.ibm.com/50XV1X3GTD",
+                  "isDisabled": false
+              },
+              "id": "c4e6c3d8e7e059be12bdccc7d0f9a71e",
+              "iocs": {},
+              "type": "casefile"
+          }
+      ]
+  },
+    "output": {
+      "sightings": [
+        {
+          "schema_version": "1.0.22",
+          "confidence": "High",
+          "count": 1,
+          "type": "sighting",
+          "source": "IBM X-Force Exchange",
+          "observed_time": {
+            "start_time": "2020-11-17T02:37:31.837Z",
+            "end_time": "2020-11-17T02:37:31.837Z"
+          },
+          "internal": false,
+          "observables": [
+            {
+              "type": "ipv6",
+              "value": "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+            }
+          ],
+          "title": "Contained in Collection: Phishing & Spam",
+          "external_ids": [
+            "0777fb2ca2d2a93ccc01e1325b206c98",
+            "c4e6c3d8e7e059be12bdccc7d0f9a71e"
+          ],
+          "external_references": [
+            {
+              "source_name": "IBM X-Force Exchange",
+              "external_id": "0777fb2ca2d2a93ccc01e1325b206c98",
+              "url": "https://exchange/collection/Phishing & Spam-0777fb2ca2d2a93ccc01e1325b206c98"
+            },
+            {
+              "source_name": "IBM X-Force Exchange",
+              "external_id": "c4e6c3d8e7e059be12bdccc7d0f9a71e",
+              "url": "https://exchange/collection/NVSP_2019-04-11-c4e6c3d8e7e059be12bdccc7d0f9a71e"
+            }
+          ],
+          "source_uri": "https://exchange/collection/Phishing & Spam-0777fb2ca2d2a93ccc01e1325b206c98"
+        },
+        {
+          "schema_version": "1.0.22",
+          "confidence": "High",
+          "count": 1,
+          "type": "sighting",
+          "source": "IBM X-Force Exchange",
+          "observed_time": {
+            "start_time": "2019-06-13T01:24:28.409Z",
+            "end_time": "2019-06-13T01:24:28.409Z"
+          },
+          "internal": false,
+          "observables": [
+            {
+              "type": "ipv6",
+              "value": "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+            }
+          ],
+          "title": "Contained in Collection: NVSP_2019-04-11",
+          "external_ids": [
+            "0777fb2ca2d2a93ccc01e1325b206c98",
+            "c4e6c3d8e7e059be12bdccc7d0f9a71e"
+          ],
+          "external_references": [
+            {
+              "source_name": "IBM X-Force Exchange",
+              "external_id": "0777fb2ca2d2a93ccc01e1325b206c98",
+              "url": "https://exchange/collection/Phishing & Spam-0777fb2ca2d2a93ccc01e1325b206c98"
+            },
+            {
+              "source_name": "IBM X-Force Exchange",
+              "external_id": "c4e6c3d8e7e059be12bdccc7d0f9a71e",
+              "url": "https://exchange/collection/NVSP_2019-04-11-c4e6c3d8e7e059be12bdccc7d0f9a71e"
+            }
+          ],
+          "source_uri": "https://exchange/collection/NVSP_2019-04-11-c4e6c3d8e7e059be12bdccc7d0f9a71e"
+        }
+      ],
+      "indicators": [
+        {
+          "schema_version": "1.0.22",
+          "type": "indicator",
+          "confidence": "High",
+          "source": "IBM X-Force Exchange",
+          "producer": "Jonas Winzen (IBM)",
+          "title": "Phishing & Spam",
+          "external_ids": [
+            "0777fb2ca2d2a93ccc01e1325b206c98",
+            "c4e6c3d8e7e059be12bdccc7d0f9a71e"
+          ],
+          "external_references": [
+            {
+              "source_name": "IBM X-Force Exchange",
+              "external_id": "0777fb2ca2d2a93ccc01e1325b206c98",
+              "url": "https://exchange/collection/Phishing & Spam-0777fb2ca2d2a93ccc01e1325b206c98"
+            },
+            {
+              "source_name": "IBM X-Force Exchange",
+              "external_id": "c4e6c3d8e7e059be12bdccc7d0f9a71e",
+              "url": "https://exchange/collection/NVSP_2019-04-11-c4e6c3d8e7e059be12bdccc7d0f9a71e"
+            }
+          ],
+          "source_uri": "https://exchange/collection/Phishing & Spam-0777fb2ca2d2a93ccc01e1325b206c98"
+        },
+        {
+          "schema_version": "1.0.22",
+          "type": "indicator",
+          "confidence": "High",
+          "source": "IBM X-Force Exchange",
+          "producer": "Er. Tapan Jatakia",
+          "title": "NVSP_2019-04-11",
+          "external_ids": [
+            "0777fb2ca2d2a93ccc01e1325b206c98",
+            "c4e6c3d8e7e059be12bdccc7d0f9a71e"
+          ],
+          "external_references": [
+            {
+              "source_name": "IBM X-Force Exchange",
+              "external_id": "0777fb2ca2d2a93ccc01e1325b206c98",
+              "url": "https://exchange/collection/Phishing & Spam-0777fb2ca2d2a93ccc01e1325b206c98"
+            },
+            {
+              "source_name": "IBM X-Force Exchange",
+              "external_id": "c4e6c3d8e7e059be12bdccc7d0f9a71e",
+              "url": "https://exchange/collection/NVSP_2019-04-11-c4e6c3d8e7e059be12bdccc7d0f9a71e"
+            }
+          ],
+          "source_uri": "https://exchange/collection/NVSP_2019-04-11-c4e6c3d8e7e059be12bdccc7d0f9a71e"
+        }
+      ],
+      "relationships": [
+        {
+          "schema_version": "1.0.22",
+          "type": "relationship",
+          "relationship_type": "member-of"
+        },
+        {
+          "schema_version": "1.0.22",
+          "type": "relationship",
+          "relationship_type": "member-of"
+        }
+      ]
+    }
   }
 }
