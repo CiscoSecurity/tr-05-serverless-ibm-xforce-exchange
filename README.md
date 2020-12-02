@@ -300,7 +300,7 @@ header set to `Bearer <JWT>`.
 ### CTIM Mapping Specifics
 
 Each X-Force `associated collection` generates a CTIM `Sighting` and `Indicator` 
-linked with `member-of Relation`.
+linked with a `member-of` `Relation`.
 
 Data from X-Force `report` is used to generate
 following CTIM entities depending on the observable type.
@@ -310,15 +310,15 @@ For `URL` and `Domain`:
    - a `Judgement` based on `report` `.result.score`
    - an `Indicator` for each `category` in `report` `.result.cats`
    - a `Sighting` for each `category` in `report` `.result.cats`
-   - a `sighting-of Relation` for `Sighting` and `Indicator`  created from one `category`
+   - a `sighting-of` `Relation` for `Sighting` and `Indicator`  created from one `category`
 
 For `IP` and `IPv6`:
    - a `Verdict` based on `report` `.score`
    - a `Judgement` for each `category` in `report` `.cats`
    - an `Indicator` for each `category` in `report` `.cats`
    - a `Sighting` for each `category` in `report` `.cats`
-   - a `based-on Relation` for `Sighting` and `Judgement`  created from one `category`
-   - a `based-on Relation` for `Judgement` and `Indicator`  created from one `category`
+   - a `based-on` `Relation` for `Sighting` and `Judgement`  created from one `category`
+   - a `based-on` `Relation` for `Judgement` and `Indicator`  created from one `category`
   
 For `MD5`, `SHA1` and `SHA256`:
    - a `Verdict` based on `report` `malware.risk`
