@@ -300,7 +300,7 @@ Each X-Force `associated collection` generates a CTIM `Sighting` and `Indicator`
 linked with `member-of Relation`.
 
 Data from X-Force `report` is used to generate
-following CTIM entities depending on observable type.
+following CTIM entities depending on the observable type.
  
 For `URL` and `Domain`:
    - a `Verdict` based on `report` `.result.score`
