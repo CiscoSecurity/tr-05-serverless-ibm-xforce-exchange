@@ -39,7 +39,7 @@
             "value": "www.ibm.com/smarterplanet"
           },
           "priority": 85,
-          "severity": "None",
+          "severity": "High",
           "source": "IBM X-Force Exchange",
           "type": "judgement"
         }

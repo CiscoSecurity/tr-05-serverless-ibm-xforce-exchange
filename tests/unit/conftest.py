@@ -340,7 +340,7 @@ def success_enrich_expected_body(route, success_enrich_refer_body):
                             },
                             "priority": 85,
                             "schema_version": "1.0.22",
-                            "severity": "None",
+                            "severity": "Low",
                             "source": "IBM X-Force Exchange",
                             "type": "judgement"
                         }

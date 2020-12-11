@@ -225,9 +225,19 @@ class Mapping(metaclass=ABCMeta):
                 return result
 
     @staticmethod
-    @abstractmethod
     def _severity(score):
-        """Map score value to CTIM severity."""
+        if not score:
+            return UNKNOWN_SEVERITY
+
+        segments = [
+            (3.9, LOW_SEVERITY),
+            (6.9, MEDIUM_SEVERITY),
+            (10, HIGH_SEVERITY)
+        ]
+
+        for bound, result in segments:
+            if score <= bound:
+                return result
 
     @staticmethod
     def _valid_time(number_of_days_valid=None):
@@ -278,10 +288,6 @@ class URL(Mapping):
 
         return bundle
 
-    @staticmethod
-    def _severity(score):
-        return NONE_SEVERITY
-
 
 class Domain(URL):
     @classmethod
@@ -322,21 +328,6 @@ class IP(Mapping):
             bundle.add(self._relationship(judgement, indicator, 'based-on'))
 
         return bundle
-
-    @staticmethod
-    def _severity(score):
-        if not score:
-            return UNKNOWN_SEVERITY
-
-        segments = [
-            (3.9, LOW_SEVERITY),
-            (6.9, MEDIUM_SEVERITY),
-            (10, HIGH_SEVERITY)
-        ]
-
-        for bound, result in segments:
-            if score <= bound:
-                return result
 
 
 class IPV6(IP):
