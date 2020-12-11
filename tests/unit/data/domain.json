@@ -39,7 +39,7 @@
             "value": "ibm.com"
           },
           "priority": 85,
-          "severity": "None",
+          "severity": "Unknown",
           "source": "IBM X-Force Exchange",
           "type": "judgement"
         }
