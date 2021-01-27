@@ -2,6 +2,7 @@ import os
 import json
 from uuid import NAMESPACE_X500
 
+
 class Config:
     settings = json.load(open('container_settings.json', 'r'))
     SECRET_KEY = settings["SECRET_KEY"]
@@ -29,4 +30,3 @@ class Config:
         CTR_ENTITIES_LIMIT = CTR_ENTITIES_LIMIT_DEFAULT
     if CTR_ENTITIES_LIMIT > CTR_ENTITIES_LIMIT_MAX:
         CTR_ENTITIES_LIMIT = CTR_ENTITIES_LIMIT_MAX
-
