@@ -1,0 +1,296 @@
+{
+  "process_report_data": {
+    "input": {
+      "result": {
+        "url": "ibm.com",
+        "cats": {
+          "Software / Hardware": true,
+          "General Business": true
+        },
+        "score": null,
+        "application": {},
+        "categoryDescriptions": {
+          "Software / Hardware": "This category includes Web sites from the area of software, computer hardware and other electronic components.",
+          "General Business": "This category includes Web sites of industry, business, economy and supply of services."
+        }
+      },
+      "tags": []
+    },
+    "output": {
+      "verdicts": [
+        {
+          "disposition": 5,
+          "observable": {
+            "type": "domain",
+            "value": "ibm.com"
+          },
+          "type": "verdict",
+          "disposition_name": "Unknown"
+        }
+      ],
+      "judgements": [
+        {
+          "schema_version": "1.0.22",
+          "confidence": "High",
+          "disposition": 5,
+          "disposition_name": "Unknown",
+          "observable": {
+            "type": "domain",
+            "value": "ibm.com"
+          },
+          "priority": 85,
+          "severity": "Unknown",
+          "source": "IBM X-Force Exchange",
+          "type": "judgement"
+        }
+      ],
+      "sightings": [
+        {
+          "schema_version": "1.0.22",
+          "confidence": "High",
+          "count": 1,
+          "type": "sighting",
+          "source": "IBM X-Force Exchange",
+          "internal": false,
+          "observables": [
+            {
+              "type": "domain",
+              "value": "ibm.com"
+            }
+          ],
+          "source_uri": "",
+          "title": "General Business"
+        },
+        {
+          "schema_version": "1.0.22",
+          "confidence": "High",
+          "count": 1,
+          "type": "sighting",
+          "source": "IBM X-Force Exchange",
+          "internal": false,
+          "observables": [
+            {
+              "type": "domain",
+              "value": "ibm.com"
+            }
+          ],
+          "source_uri": "",
+          "title": "Software / Hardware"
+        }
+      ],
+      "indicators": [
+        {
+          "schema_version": "1.0.22",
+          "type": "indicator",
+          "confidence": "High",
+          "source": "IBM X-Force Exchange",
+          "producer": "IBM X-Force Exchange",
+          "source_uri": "",
+          "title": "General Business",
+          "tags": [
+            "True"
+          ]
+        },
+        {
+          "schema_version": "1.0.22",
+          "type": "indicator",
+          "confidence": "High",
+          "source": "IBM X-Force Exchange",
+          "producer": "IBM X-Force Exchange",
+          "source_uri": "",
+          "title": "Software / Hardware",
+          "tags": [
+            "True"
+          ]
+        }
+      ],
+      "relationships": [
+        {
+          "schema_version": "1.0.22",
+          "type": "relationship",
+          "relationship_type": "sighting-of"
+        },
+        {
+          "schema_version": "1.0.22",
+          "type": "relationship",
+          "relationship_type": "sighting-of"
+        }
+      ]
+    }
+  },
+  "process_api_linkage": {
+    "input": {
+      "linkedEntities": [
+          {
+              "title": "Phishing & Spam",
+              "created": "2020-11-17T02:37:31.837Z",
+              "shared": "public",
+              "category": "3public",
+              "owner": {
+                  "name": "Jonas Winzen (IBM)",
+                  "userid": "http://www.ibm.com/310000H63N",
+                  "verified": "ibmexpert",
+                  "isDisabled": false
+              },
+              "id": "0777fb2ca2d2a93ccc01e1325b206c98",
+              "iocs": {},
+              "type": "casefile"
+          },
+          {
+              "title": "NVSP_2019-04-11",
+              "created": "2019-06-13T01:24:28.409Z",
+              "shared": "public",
+              "category": "3public",
+              "owner": {
+                  "name": "Er. Tapan Jatakia",
+                  "userid": "http://www.ibm.com/50XV1X3GTD",
+                  "isDisabled": false
+              },
+              "id": "c4e6c3d8e7e059be12bdccc7d0f9a71e",
+              "iocs": {},
+              "type": "casefile"
+          }
+      ]
+  },
+    "output": {
+      "sightings": [
+        {
+          "schema_version": "1.0.22",
+          "confidence": "High",
+          "count": 1,
+          "type": "sighting",
+          "source": "IBM X-Force Exchange",
+          "observed_time": {
+            "start_time": "2020-11-17T02:37:31.837Z",
+            "end_time": "2020-11-17T02:37:31.837Z"
+          },
+          "internal": false,
+          "observables": [
+            {
+              "type": "domain",
+              "value": "ibm.com"
+            }
+          ],
+          "title": "Contained in Collection: Phishing & Spam",
+          "external_ids": [
+            "0777fb2ca2d2a93ccc01e1325b206c98",
+            "c4e6c3d8e7e059be12bdccc7d0f9a71e"
+          ],
+          "external_references": [
+            {
+              "source_name": "IBM X-Force Exchange",
+              "external_id": "0777fb2ca2d2a93ccc01e1325b206c98",
+              "url": "https://exchange/collection/Phishing & Spam-0777fb2ca2d2a93ccc01e1325b206c98"
+            },
+            {
+              "source_name": "IBM X-Force Exchange",
+              "external_id": "c4e6c3d8e7e059be12bdccc7d0f9a71e",
+              "url": "https://exchange/collection/NVSP_2019-04-11-c4e6c3d8e7e059be12bdccc7d0f9a71e"
+            }
+          ],
+          "source_uri": "https://exchange/collection/Phishing & Spam-0777fb2ca2d2a93ccc01e1325b206c98"
+        },
+        {
+          "schema_version": "1.0.22",
+          "confidence": "High",
+          "count": 1,
+          "type": "sighting",
+          "source": "IBM X-Force Exchange",
+          "observed_time": {
+            "start_time": "2019-06-13T01:24:28.409Z",
+            "end_time": "2019-06-13T01:24:28.409Z"
+          },
+          "internal": false,
+          "observables": [
+            {
+              "type": "domain",
+              "value": "ibm.com"
+            }
+          ],
+          "title": "Contained in Collection: NVSP_2019-04-11",
+          "external_ids": [
+            "0777fb2ca2d2a93ccc01e1325b206c98",
+            "c4e6c3d8e7e059be12bdccc7d0f9a71e"
+          ],
+          "external_references": [
+            {
+              "source_name": "IBM X-Force Exchange",
+              "external_id": "0777fb2ca2d2a93ccc01e1325b206c98",
+              "url": "https://exchange/collection/Phishing & Spam-0777fb2ca2d2a93ccc01e1325b206c98"
+            },
+            {
+              "source_name": "IBM X-Force Exchange",
+              "external_id": "c4e6c3d8e7e059be12bdccc7d0f9a71e",
+              "url": "https://exchange/collection/NVSP_2019-04-11-c4e6c3d8e7e059be12bdccc7d0f9a71e"
+            }
+          ],
+          "source_uri": "https://exchange/collection/NVSP_2019-04-11-c4e6c3d8e7e059be12bdccc7d0f9a71e"
+        }
+      ],
+      "indicators": [
+        {
+          "schema_version": "1.0.22",
+          "type": "indicator",
+          "confidence": "High",
+          "source": "IBM X-Force Exchange",
+          "producer": "Jonas Winzen (IBM)",
+          "title": "Phishing & Spam",
+          "external_ids": [
+            "0777fb2ca2d2a93ccc01e1325b206c98",
+            "c4e6c3d8e7e059be12bdccc7d0f9a71e"
+          ],
+          "external_references": [
+            {
+              "source_name": "IBM X-Force Exchange",
+              "external_id": "0777fb2ca2d2a93ccc01e1325b206c98",
+              "url": "https://exchange/collection/Phishing & Spam-0777fb2ca2d2a93ccc01e1325b206c98"
+            },
+            {
+              "source_name": "IBM X-Force Exchange",
+              "external_id": "c4e6c3d8e7e059be12bdccc7d0f9a71e",
+              "url": "https://exchange/collection/NVSP_2019-04-11-c4e6c3d8e7e059be12bdccc7d0f9a71e"
+            }
+          ],
+          "source_uri": "https://exchange/collection/Phishing & Spam-0777fb2ca2d2a93ccc01e1325b206c98"
+        },
+        {
+          "schema_version": "1.0.22",
+          "type": "indicator",
+          "confidence": "High",
+          "source": "IBM X-Force Exchange",
+          "producer": "Er. Tapan Jatakia",
+          "title": "NVSP_2019-04-11",
+          "external_ids": [
+            "0777fb2ca2d2a93ccc01e1325b206c98",
+            "c4e6c3d8e7e059be12bdccc7d0f9a71e"
+          ],
+          "external_references": [
+            {
+              "source_name": "IBM X-Force Exchange",
+              "external_id": "0777fb2ca2d2a93ccc01e1325b206c98",
+              "url": "https://exchange/collection/Phishing & Spam-0777fb2ca2d2a93ccc01e1325b206c98"
+            },
+            {
+              "source_name": "IBM X-Force Exchange",
+              "external_id": "c4e6c3d8e7e059be12bdccc7d0f9a71e",
+              "url": "https://exchange/collection/NVSP_2019-04-11-c4e6c3d8e7e059be12bdccc7d0f9a71e"
+            }
+          ],
+          "source_uri": "https://exchange/collection/NVSP_2019-04-11-c4e6c3d8e7e059be12bdccc7d0f9a71e"
+        }
+      ],
+      "relationships": [
+        {
+          "schema_version": "1.0.22",
+          "type": "relationship",
+          "relationship_type": "member-of"
+        },
+        {
+          "schema_version": "1.0.22",
+          "type": "relationship",
+          "relationship_type": "member-of"
+        }
+      ]
+    }
+  }
+}
