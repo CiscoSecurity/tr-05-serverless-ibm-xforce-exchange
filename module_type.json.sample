@@ -58,8 +58,7 @@
     ],
     "auth-type": "configuration-token",
     "configuration-token-alg": "HS256",
-    "configuration-token-key": "SECRETKEYHERE",
-    "custom_jwks_host": "visibility.amp.cisco.com"
+    "configuration-token-key": "SECRETKEYHERE"
   },
   "flags": [
     "serverless"
