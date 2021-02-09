@@ -15,14 +15,14 @@ The code is provided here purely for educational purposes.
 
 ## Testing (Optional)
 
-If you want to test the application you will require Docker and several dependencies from the [requirements.txt](requirements.txt) file:
+If you want to test the application you will require Docker and several dependencies from the [requirements.txt](code/requirements.txt) file:
 ```
 pip install --upgrade --requirement requirements.txt
 ```
 
 You can perform two kinds of testing:
 
-- Run static code analysis checking for any semantic discrepancies and [PEP 8] https://www.python.org/dev/peps/pep-0008/) compliance:
+- Run static code analysis checking for any semantic discrepancies and [PEP 8](https://www.python.org/dev/peps/pep-0008/) compliance:
 
   `flake8 code`
 
@@ -35,7 +35,7 @@ just make sure to send requests to your Lambda's `URL` with the `Authorization`
 header set to `Bearer <JWT>`.
 
 **NOTE.** If you need input data for testing purposes you can use data from the
-[observables.json](observables.json) file.
+[observables.json](code/observables.json) file.
 
 ### Building the Docker Container
 In order to build the application, we need to use a `Dockerfile`.  
@@ -164,3 +164,170 @@ For `MD5`, `SHA1` and `SHA256`:
    - a `Verdict` based on `report` `malware.risk`
    - a `Judgement` based on `report` `malware.risk`
  
+
+# IBM X-Force Exchange Relay (AWS hosted)
+
+The Relay itself is just a simple application written in Python that can be
+easily packaged and deployed as an AWS Lambda Function using
+[Zappa](https://github.com/Miserlou/Zappa).
+
+## Rationale
+
+1. We need an application that will translate API requests from SecureX Threat Response
+to the third-party integration, and vice versa. This application is provided
+here in the GitHub repository, and we are going to install it in AWS Lambda
+using Zappa.
+
+2. AWS Lambda allows us to deploy our application without deploying a dedicated
+server or paying for so called "idle" cycles. AWS handles instantiation and
+resource provisioning; all we need to do is define the access rights and upload
+our application.
+
+3. Zappa is a helper tool that will package our application and publish it to
+AWS as a Lambda function. It abstracts a large amount of manual configuration
+and requires only a very simple configuration file, which we have provided and
+will explain how to customize it during this process.
+
+## Step 0: AWS Setup
+
+To get started, you have to set up your AWS environment first by carefully
+following the instructions from the [AWS HOWTO](code/aws/HOWTO.md). In addition, the
+document also covers how to configure the [Zappa Settings](code/zappa_settings.json)
+by explaining the relationships between the values there and your AWS setup.
+
+## Step 1: Requirements Installation
+
+First of all, make sure that you already have Python 3 installed by typing
+```
+python3 --version
+```
+in your command-line shell.
+
+The application has been implemented and tested using `Python 3.7`. You may try
+to use any higher versions if you wish as they should be backward-compatible.
+
+After that, you have to create a "virtual environment" to isolate the
+application-specific requirements from the libraries globally installed to your
+system. Here are the steps to follow:
+
+1. Create a virtual environment named `venv`:
+
+   `python3 -m venv venv`
+
+2. Activate the virtual environment:
+   - Linux/Mac: `source venv/bin/activate`
+   - Windows: `venv\Scripts\activate.bat`
+
+3. Upgrade PIP (optional):
+
+   `pip install --upgrade pip`
+
+**NOTE**. The virtual environment has to be created only once, you just have
+to make sure to activate it each time you are working on or playing with the
+application (modern IDEs can automatically do that for you). You can deactivate
+a previously activated virtual environment by simply typing `deactivate` in
+your command-line shell.
+
+Finally, install the libraries required for the application to function from
+the [requirements.txt](code/requirements.txt) file:
+
+```
+cd code
+pip install --upgrade --requirement requirements.txt
+```
+
+## Step 2: Application Deployment
+
+### AWS Lambda Function
+
+To `deploy` your application to AWS as a Lambda function for the first time,
+run the following command (make sure you are in code directory):
+```
+zappa deploy dev
+```
+
+**NOTE**. Here `dev` is just the name of the default stage. You may define as
+many stages as you like. Each Zappa command requires a stage to be specified so
+make sure to replace `dev` with the name of your custom stage when necessary.
+
+**NOTE**. If you are experiencing any problems with running the command then
+check the [AWS Common Errors](code/aws/CommonErrors.md) guide on troubleshooting
+of some most common types of errors.
+
+Once the Lambda has been deployed, make sure to save the public `URL` to your
+Lambda returned by Zappa. It will look like this:
+```
+https://<RANDOM_ID>.execute-api.<AWS_REGION>.amazonaws.com/<STAGE>
+```
+
+You can check the `status` of your deployment with the corresponding command:
+```
+zappa status dev
+```
+
+Notice that you have to `deploy` your Lambda only once. Each time you make
+changes to the source code or to the settings file you just have to `update`
+the Lambda by running the following command:
+```
+zappa update dev
+```
+
+As a bonus, you can also monitor your Lambda's HTTP traffic in near real-time
+with the `tail` command:
+```
+zappa tail dev --http
+```
+
+If you do not need your Lambda anymore you can run the following command to
+get rid of it altogether and clean up the underlying resources:
+```
+zappa undeploy dev
+```
+
+**NOTE**. The `deploy` command always returns a brand new `URL`. The `update`
+command does not change the current `URL`. The `undeploy` command destroys the
+old `URL` forever.
+
+### SecureX Threat Response Module
+
+Now, the only things left to do are:
+
+- Generate a secret key and encode your credentials into a token. Let us name
+those `SECRET_KEY` and `JWT` respectively so that we can refer to them later
+on.
+
+- Set the `SECRET_KEY` environment variable for your Lambda using the
+corresponding value from the previous step.
+
+- Create a corresponding SecureX Threat Response module based on your Lambda.
+
+To simplify the JWT-related stuff, we have prepared for you the
+[SecureX Threat Response JWT Generator](https://github.com/CiscoSecurity/tr-05-jwt-generator)
+tool that provides only a single easy-to-use `jwt` command. Since the tool is
+included into the [requirements.txt](code/requirements.txt) file, at this point it
+should already have been installed along with the other dependencies.
+
+Follow the steps below to finish the deployment procedure:
+
+1. Run the `jwt` command of the tool specifying a Zappa stage, e.g. `jwt dev`.
+It will prompt you to enter your third-party credentials according to the `jwt`
+structure defined in the [Module Settings](code/module_settings.json).
+
+2. The command will generate a `SECRET_KEY`/`JWT` pair for you based on your
+just entered credentials. Make sure to save both.
+
+3. The command will also build the link to the AWS Console page with your
+Lambda's environment variables. Go set the `SECRET_KEY` environment variable
+there. This is important since the Lambda has to know the `SECRET_KEY` so that
+it can verify and decode the `JWT` from incoming requests. If you do not
+understand how to set the `SECRET_KEY` environment variable then check the
+[AWS Environment Variables](code/aws/EnvironmentVariables.md) guide on passing
+arbitrary environment variables to Lambdas.
+
+4. The command will also build the links to the SecureX Threat Response pages (in all
+available regions) with the corresponding module creation forms. Select the
+link corresponding to your SecureX Threat Response region. The form there will require
+you to enter both your Lambda's `URL` and your `JWT` (along with a unique name)
+to finally create your SecureX Threat Response module.
+
+That is it! Your Serverless Relay is ready to use! Congratulations!
