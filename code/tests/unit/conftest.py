@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from http import HTTPStatus
 from unittest.mock import MagicMock
@@ -131,6 +132,57 @@ def xforce_response_success_enrich_report(secret_key):
 
 
 @fixture(scope='session')
+def xforce_response_success_enrich_resolve(secret_key):
+    return xforce_api_response_mock(
+        HTTPStatus.OK,
+        payload={
+            "A": [
+                "129.42.38.10"
+            ],
+            "AAAA": [
+                "2606:4700:0000:0000:0000:0000:6810:2548"
+            ],
+            "TXT": [],
+            "MX": [],
+            "Passive": {
+                "query": "ibm.com",
+                "records": [
+                    {
+                        "value": "23.194.131.195",
+                        "type": "ip",
+                        "recordType": "A",
+                        "first": "2020-11-11T15:50:00Z",
+                        "last": "2020-11-11T15:50:00Z"
+                    },
+                    {
+                        "value": "23.194.131.195",
+                        "type": "ip",
+                        "recordType": "A",
+                        "first": "2019-11-11T15:50:00Z",
+                        "last": "2019-11-11T15:50:00Z"
+                    },
+                    {
+                        "value": "2606:4700:0000:0000:0000:0000:6810:2548",
+                        "type": "ip",
+                        "recordType": "AAAA",
+                        "first": "2020-11-11T15:50:00Z",
+                        "last": "2020-11-11T15:50:00Z"
+                    },
+                    {
+                        "value": "2606:4700:0000:0000:0000:0000:6810:2648",
+                        "type": "ip",
+                        "recordType": "AAAA",
+                        "first": "2020-11-11T15:50:00Z",
+                        "last": "2020-11-11T15:50:00Z"
+                    }
+                ]
+            },
+            "total_rows": 1892
+        }
+    )
+
+
+@fixture(scope='session')
 def xforce_response_success_enrich_api_linkage(secret_key):
     return xforce_api_response_mock(
         HTTPStatus.OK,
@@ -232,230 +284,11 @@ def ssl_error_expected_body(route, success_enrich_refer_body):
 
 @fixture(scope='module')
 def success_enrich_expected_body(route, success_enrich_refer_body):
-    verdicts = {
-        'verdicts':
-            {
-                'count': 1,
-                'docs': [
-                    {'disposition': 5,
-                     'disposition_name': 'Unknown',
-                     'observable': {'type': 'domain',
-                                    'value': 'ibm.com'},
-                     'type': 'verdict'}
-                ]
-            }
-    }
-    data = {'data': verdicts}
+    with open('tests/unit/data/' + 'enrich_observe_success.json') as file:
+        data = json.load(file)
 
-    if route.endswith('/observe/observables'):
-        data = {
-            "data": {
-                "indicators": {
-                    "count": 2,
-                    "docs": [
-                        {
-                            "confidence": "High",
-                            "external_ids": [
-                                "62eece6bd7e7399a7366cd5d8e910182",
-                                "8b186bc4459380a5606c322ee20c7729"
-                            ],
-                            "external_references": [
-                                {
-                                    "external_id":
-                                        "62eece6bd7e7399a7366cd5d8e910182",
-                                    "source_name": "IBM X-Force Exchange",
-                                    "url":
-                                        "https://exchange.xforce.ibmcloud.com/"
-                                        "collection/WannaCry-62eece6bd7e7399a7"
-                                        "366cd5d8e910182"
-                                },
-                                {
-                                    "external_id":
-                                        "8b186bc4459380a5606c322ee20c7729",
-                                    "source_name": "IBM X-Force Exchange",
-                                    "url":
-                                        "https://exchange.xforce.ibmcloud.com/"
-                                        "collection/WCry2 Ransomware Outbreak-"
-                                        "8b186bc4459380a5606c322ee20c7729"
-                                }
-                            ],
-                            "producer": "Jane Ginn",
-                            "schema_version": "1.0.22",
-                            "source": "IBM X-Force Exchange",
-                            "source_uri":
-                                "https://exchange.xforce.ibmcloud.com/"
-                                "collection/"
-                                "WannaCry-62eece6bd7e7399a7366cd5d8e910182",
-                            "title": "WannaCry",
-                            "type": "indicator"
-                        },
-                        {
-                            "confidence": "High",
-                            "external_ids": [
-                                "62eece6bd7e7399a7366cd5d8e910182",
-                                "8b186bc4459380a5606c322ee20c7729"
-                            ],
-                            "external_references": [
-                                {
-                                    "external_id":
-                                        "62eece6bd7e7399a7366cd5d8e910182",
-                                    "source_name": "IBM X-Force Exchange",
-                                    "url":
-                                        "https://exchange.xforce.ibmcloud.com/"
-                                        "collection/WannaCry-"
-                                        "62eece6bd7e7399a7366cd5d8e910182"
-                                },
-                                {
-                                    "external_id":
-                                        "8b186bc4459380a5606c322ee20c7729",
-                                    "source_name": "IBM X-Force Exchange",
-                                    "url":
-                                        "https://exchange.xforce.ibmcloud.com/"
-                                        "collection/WCry2 Ransomware Outbreak-"
-                                        "8b186bc4459380a5606c322ee20c7729"
-                                }
-                            ],
-                            "producer": "Nick Bradley",
-                            "schema_version": "1.0.22",
-                            "source": "IBM X-Force Exchange",
-                            "source_uri":
-                                "https://exchange.xforce.ibmcloud.com/"
-                                "collection/WCry2 Ransomware Outbreak-"
-                                "8b186bc4459380a5606c322ee20c7729",
-                            "title": "WCry2 Ransomware Outbreak",
-                            "type": "indicator"
-                        }
-                    ]
-                },
-                "judgements": {
-                    "count": 1,
-                    "docs": [
-                        {
-                            "confidence": "High",
-                            "disposition": 5,
-                            "disposition_name": "Unknown",
-                            "observable": {
-                                "type": "domain",
-                                "value": "ibm.com"
-                            },
-                            "priority": 85,
-                            "schema_version": "1.0.22",
-                            "severity": "Low",
-                            "source": "IBM X-Force Exchange",
-                            "type": "judgement"
-                        }
-                    ]
-                },
-                "relationships": {
-                    "count": 2,
-                    "docs": [
-                        {
-                            "relationship_type": "member-of",
-                            "schema_version": "1.0.22",
-                            "type": "relationship"
-                        },
-                        {
-                            "relationship_type": "member-of",
-                            "schema_version": "1.0.22",
-                            "type": "relationship"
-                        }
-                    ]
-                },
-                "sightings": {
-                    "count": 2,
-                    "docs": [
-                        {
-                            "confidence": "High",
-                            "count": 1,
-                            "external_ids": [
-                                "62eece6bd7e7399a7366cd5d8e910182",
-                                "8b186bc4459380a5606c322ee20c7729"
-                            ],
-                            "external_references": [
-                                {
-                                    "external_id":
-                                        "62eece6bd7e7399a7366cd5d8e910182",
-                                    "source_name": "IBM X-Force Exchange",
-                                    "url":
-                                        "https://exchange.xforce.ibmcloud.com/"
-                                        "collection/WannaCry-"
-                                        "62eece6bd7e7399a7366cd5d8e910182"
-                                },
-                                {
-                                    "external_id":
-                                        "8b186bc4459380a5606c322ee20c7729",
-                                    "source_name": "IBM X-Force Exchange",
-                                    "url":
-                                        "https://exchange.xforce.ibmcloud.com/"
-                                        "collection/WCry2 Ransomware Outbreak-"
-                                        "8b186bc4459380a5606c322ee20c7729"
-                                }
-                            ],
-                            "internal": False,
-                            "observables": [
-                                {
-                                    "type": "domain",
-                                    "value": "ibm.com"
-                                }
-                            ],
-                            "schema_version": "1.0.22",
-                            "source": "IBM X-Force Exchange",
-                            "source_uri":
-                                "https://exchange.xforce.ibmcloud.com/"
-                                "collection/WannaCry-"
-                                "62eece6bd7e7399a7366cd5d8e910182",
-                            "title": "Contained in Collection: WannaCry",
-                            "type": "sighting"
-                        },
-                        {
-                            "confidence": "High",
-                            "count": 1,
-                            "external_ids": [
-                                "62eece6bd7e7399a7366cd5d8e910182",
-                                "8b186bc4459380a5606c322ee20c7729"
-                            ],
-                            "external_references": [
-                                {
-                                    "external_id":
-                                        "62eece6bd7e7399a7366cd5d8e910182",
-                                    "source_name": "IBM X-Force Exchange",
-                                    "url":
-                                        "https://exchange.xforce.ibmcloud.com/"
-                                        "collection/WannaCry-"
-                                        "62eece6bd7e7399a7366cd5d8e910182"
-                                },
-                                {
-                                    "external_id":
-                                        "8b186bc4459380a5606c322ee20c7729",
-                                    "source_name": "IBM X-Force Exchange",
-                                    "url":
-                                        "https://exchange.xforce.ibmcloud.com/"
-                                        "collection/WCry2 Ransomware Outbreak-"
-                                        "8b186bc4459380a5606c322ee20c7729"
-                                }
-                            ],
-                            "internal": False,
-                            "observables": [
-                                {
-                                    "type": "domain",
-                                    "value": "ibm.com"
-                                }
-                            ],
-                            "schema_version": "1.0.22",
-                            "source": "IBM X-Force Exchange",
-                            "source_uri":
-                                "https://exchange.xforce.ibmcloud.com/"
-                                "collection/WCry2 Ransomware Outbreak-"
-                                "8b186bc4459380a5606c322ee20c7729",
-                            "title": "Contained in Collection: "
-                                     "WCry2 Ransomware Outbreak",
-                            "type": "sighting"
-                        }
-                    ]
-                },
-                **verdicts
-            }
-        }
+        if route.endswith('/deliberate/observables'):
+            data = {'data': {'verdicts': data['data']['verdicts']}}
 
     return expected_body(
         route, data, refer_body=success_enrich_refer_body

@@ -26,11 +26,13 @@ def valid_json():
 def test_enrich_call_success(
         route, client, valid_jwt, valid_json,
         xforce_response_success_enrich_report,
+        xforce_response_success_enrich_resolve,
         xforce_response_success_enrich_api_linkage,
         success_enrich_expected_body
 ):
     with patch('requests.request') as get_mock:
         get_mock.side_effect = [xforce_response_success_enrich_report,
+                                xforce_response_success_enrich_resolve,
                                 xforce_response_success_enrich_api_linkage]
 
         response = client.post(
