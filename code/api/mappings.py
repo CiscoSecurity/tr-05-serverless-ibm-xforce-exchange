@@ -7,7 +7,7 @@ from api.bundle import Bundle
 from api.utils import all_subclasses, time_format, transient_id
 
 CTIM_DEFAULTS = {
-    'schema_version': '1.0.22',
+    'schema_version': '1.1.1',
 }
 SOURCE = 'IBM X-Force Exchange'
 
@@ -47,12 +47,20 @@ INDICATOR_DEFAULTS = {
     'source': SOURCE,
 }
 
+RESOLVED_TO = 'Resolved_To'
+
+DNS_INFORMATION_CATEGORY = 'DNS Information'
+IP_DNS_RECORD_TYPE = 'A'
+IPV6_DNS_RECORD_TYPE = 'AAAA'
+IP_DNS_RECORD_TYPES = (IP_DNS_RECORD_TYPE, IPV6_DNS_RECORD_TYPE)
+
 
 class Mapping(metaclass=ABCMeta):
 
     def __init__(self, observable, source_uri=''):
         self.observable = observable
         self.source_uri = source_uri
+        self.resolutions = None
 
     @classmethod
     def for_(cls, observable, source_uri=''):
@@ -171,9 +179,9 @@ class Mapping(metaclass=ABCMeta):
             'valid_time': self._valid_time(number_of_days_judgements_valid)
         }
 
-    def _sighting(self, category):
+    def _sighting(self, category, description=None):
         now = time_format(datetime.now())
-        return {
+        result = {
             **SIGHTING_DEFAULTS,
             'id': transient_id(SIGHTING, category),
             'observed_time': {'start_time': now, 'end_time': now},
@@ -182,6 +190,9 @@ class Mapping(metaclass=ABCMeta):
             'source_uri': self.source_uri,
             'title': category,
         }
+        if description:
+            result['description'] = description
+        return result
 
     def _indicator(self, category, number_of_days_indicator_valid, flag=None):
         result = {
@@ -253,6 +264,55 @@ class Mapping(metaclass=ABCMeta):
         }
 
 
+class DNSInformationMapping(Mapping, ABC):
+    def process_resolutions(self, resolutions):
+        bundle = Bundle()
+
+        related = self._extract_related(resolutions)
+        if related:
+            related = sorted(related)
+            description = self._resolution_description()
+            sighting = self._sighting(
+                DNS_INFORMATION_CATEGORY, description=description
+            )
+            sighting['relations'] = [self._resolved_to(r) for r in related]
+            bundle.add(sighting)
+
+        return bundle
+
+    @staticmethod
+    def _observable_relation(relation_type, source, related):
+        return {
+            "origin": f"{SOURCE} Enrichment Module",
+            "relation": relation_type,
+            "source": source,
+            "related": related
+        }
+
+    @abstractmethod
+    def _resolved_to(self, related):
+        """
+        Return TR resolved_to relation
+        depending on an observable and related types.
+
+        """
+
+    @abstractmethod
+    def _resolution_description(self, *args):
+        """
+        Return description for a sighting based on DNS resolutions
+        depending on observable type.
+
+        """
+
+    def _extract_related(self, data):
+        passive = data.get('Passive', {}).get('records', [])
+        return set(
+            r['value'] for r in passive
+            if r['recordType'] in IP_DNS_RECORD_TYPES
+        )
+
+
 class URL(Mapping):
     @classmethod
     def type(cls):
@@ -289,13 +349,32 @@ class URL(Mapping):
         return bundle
 
 
-class Domain(URL):
+class Domain(URL, DNSInformationMapping):
     @classmethod
     def type(cls):
         return 'domain'
 
+    def _extract_related(self, data):
+        related = super()._extract_related(data)
+        related |= set(data.get(IP_DNS_RECORD_TYPE) or {})
+        related |= set(data.get(IPV6_DNS_RECORD_TYPE) or {})
+        return related
 
-class IP(Mapping):
+    def _resolution_description(self):
+        return f'IP addresses that {self.observable["value"]} resolves to'
+
+    def _resolved_to(self, ip):
+        return self._observable_relation(
+            RESOLVED_TO,
+            source=self.observable,
+            related={
+                'value': ip,
+                'type': 'ipv6' if ':' in ip else 'ip'
+            }
+        )
+
+
+class IP(DNSInformationMapping):
     @classmethod
     def type(cls):
         return 'ip'
@@ -308,7 +387,6 @@ class IP(Mapping):
                             number_of_days_verdict_valid,
                             number_of_days_judgement_valid,
                             number_of_days_indicator_valid, limit):
-
         bundle = Bundle()
 
         bundle.add(self.extract_verdict(report_data,
@@ -328,6 +406,21 @@ class IP(Mapping):
             bundle.add(self._relationship(judgement, indicator, 'based-on'))
 
         return bundle
+
+    def _extract_related(self, data):
+        related = super()._extract_related(data)
+        related |= set(data.get('RDNS', []))
+        return related
+
+    def _resolution_description(self):
+        return f'Domains that have resolved to {self.observable["value"]}'
+
+    def _resolved_to(self, domain):
+        return self._observable_relation(
+            RESOLVED_TO,
+            source={'value': domain, 'type': 'domain'},
+            related=self.observable
+        )
 
 
 class IPV6(IP):

@@ -7,7 +7,7 @@ from flask import Blueprint, current_app, g
 from api.bundle import Bundle
 from api.client import XForceClient, XFORCE_OBSERVABLE_TYPES
 from api.errors import XForceKeyError
-from api.mappings import Mapping, SIGHTING
+from api.mappings import Mapping, SIGHTING, DNSInformationMapping
 from api.schemas import ObservableSchema
 from api.utils import (
     get_json, jsonify_data, get_credentials, jsonify_result, add_error
@@ -90,26 +90,30 @@ def observe_observables():
             mapping = Mapping.for_(observable, source_uri=refer_link)
 
             if mapping:
-
                 report = client.report(observable)
-                report_bundle = Bundle()
                 if report:
                     report_bundle = mapping.process_report_data(
                         report, number_of_days_verdict_valid,
                         number_of_days_judgement_valid,
                         number_of_days_indicator_valid, limit
                     )
+                    limit -= len(report_bundle.get(SIGHTING))
+                    g.bundle.merge(report_bundle)
+
+                if isinstance(mapping, DNSInformationMapping):
+                    resolutions_bundle = mapping.process_resolutions(
+                        client.resolve(observable)
+                    )
+                    limit -= len(resolutions_bundle.get(SIGHTING))
+                    g.bundle.merge(resolutions_bundle)
 
                 api_linkage = client.api_linkage(observable)
-                api_linkage_bundle = Bundle()
                 if api_linkage:
                     api_linkage_bundle = mapping.process_api_linkage(
-                        api_linkage, ui_url, number_of_days_indicator_valid,
-                        limit-len(report_bundle.get(SIGHTING))
+                        api_linkage, ui_url,
+                        number_of_days_indicator_valid, limit
                     )
-
-                g.bundle.merge(report_bundle)
-                g.bundle.merge(api_linkage_bundle)
+                    g.bundle.merge(api_linkage_bundle)
 
     except KeyError:
         add_error(XForceKeyError())
