@@ -356,8 +356,8 @@ class Domain(URL, DNSInformationMapping):
 
     def _extract_related(self, data):
         related = super()._extract_related(data)
-        related |= set(data.get(IP_DNS_RECORD_TYPE) or {})
-        related |= set(data.get(IPV6_DNS_RECORD_TYPE) or {})
+        related |= set(data.get(IP_DNS_RECORD_TYPE, {}))
+        related |= set(data.get(IPV6_DNS_RECORD_TYPE, {}))
         return related
 
     def _resolution_description(self):
@@ -409,7 +409,7 @@ class IP(DNSInformationMapping):
 
     def _extract_related(self, data):
         related = super()._extract_related(data)
-        related |= set(data.get('RDNS', []))
+        related |= set(data.get('RDNS', {}))
         return related
 
     def _resolution_description(self):
