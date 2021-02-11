@@ -9,6 +9,34 @@ from api.mappings import (
     IP, IPV6, MD5, SHA1, SHA256, URL
 )
 
+TestData = namedtuple('TestData', 'file mapping')
+domain_test_data = TestData(
+    'domain.json', Domain({'type': 'domain', 'value': 'ibm.com'})
+)
+url_test_data = TestData(
+    'url.json', URL({'type': 'url', 'value': 'www.ibm.com/smarterplanet'})
+)
+ip_test_data = TestData('ip.json', IP({'type': 'ip', 'value': '1.2.3.4'}))
+ipv6_test_data = TestData(
+    'ipv6.json',
+    IPV6({'type': 'ipv6', 'value': '2001:0db8:85a3:0000:0000:8a2e:0370:7334'})
+)
+md5_test_data = TestData(
+    'md5.json',
+    MD5({'type': 'md5', 'value': '34d5ea586a61b0aba512c0cb1d3d8b15'})
+)
+sha1_test_data = TestData(
+    'sha1.json',
+    SHA1({'type': 'sha1',
+          'value': '0x5C11EE95649AAC7A4DE06BC83CE45C15448F44E0'})
+)
+sha256_test_data = TestData(
+    'sha256.json',
+    SHA256({'type': 'sha256',
+            'value': '091835b16192e526ee1b8a04d0fcef5'
+                     '34544cad306672066f2ad6973a4b18b19'})
+)
+
 
 def input_sets():
     TestData = namedtuple('TestData', 'file mapping')
@@ -40,7 +68,12 @@ def input_sets():
                          '34544cad306672066f2ad6973a4b18b19'}))
 
 
-@fixture(scope='module', params=input_sets(), ids=lambda d: d.file)
+@fixture(
+    scope='module', ids=lambda d: d.file,
+    params=(domain_test_data, url_test_data,
+            ip_test_data, ipv6_test_data,
+            md5_test_data, sha1_test_data, sha256_test_data)
+)
 def input_data(request):
     return request.param
 
@@ -91,6 +124,25 @@ def test_limit(input_data):
                 limit
             )
             check_bundle_len(results, limit)
+
+
+@fixture(
+    scope='module', ids=lambda d: d.file,
+    params=(domain_test_data, ip_test_data, ipv6_test_data)
+)
+def resolve_input_data(request):
+    return request.param
+
+
+def test_process_resolutions(resolve_input_data):
+    with open('tests/unit/data/' + resolve_input_data.file) as file:
+        data = json.load(file)
+
+        result = resolve_input_data.mapping.process_resolutions(
+            data['process_resolutions']['input']
+        )
+
+        check_bundle(result, data['process_resolutions']['output'])
 
 
 def test_mapping_for_():

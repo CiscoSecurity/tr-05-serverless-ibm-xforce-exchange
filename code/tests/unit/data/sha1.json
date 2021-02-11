@@ -36,7 +36,7 @@
       ],
       "judgements": [
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "confidence": "High",
           "disposition": 3,
           "disposition_name": "Suspicious",
@@ -89,7 +89,7 @@
     "output": {
       "sightings": [
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "confidence": "High",
           "count": 1,
           "type": "sighting",
@@ -125,7 +125,7 @@
           "source_uri": "https://exchange/collection/Phishing & Spam-0777fb2ca2d2a93ccc01e1325b206c98"
         },
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "confidence": "High",
           "count": 1,
           "type": "sighting",
@@ -163,7 +163,7 @@
       ],
       "indicators": [
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "indicator",
           "confidence": "High",
           "source": "IBM X-Force Exchange",
@@ -188,7 +188,7 @@
           "source_uri": "https://exchange/collection/Phishing & Spam-0777fb2ca2d2a93ccc01e1325b206c98"
         },
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "indicator",
           "confidence": "High",
           "source": "IBM X-Force Exchange",
@@ -215,12 +215,12 @@
       ],
       "relationships": [
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "relationship",
           "relationship_type": "member-of"
         },
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "relationship",
           "relationship_type": "member-of"
         }

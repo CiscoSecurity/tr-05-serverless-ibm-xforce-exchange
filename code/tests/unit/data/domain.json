@@ -30,7 +30,7 @@
       ],
       "judgements": [
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "confidence": "High",
           "disposition": 5,
           "disposition_name": "Unknown",
@@ -46,7 +46,7 @@
       ],
       "sightings": [
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "confidence": "High",
           "count": 1,
           "type": "sighting",
@@ -62,7 +62,7 @@
           "title": "General Business"
         },
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "confidence": "High",
           "count": 1,
           "type": "sighting",
@@ -80,7 +80,7 @@
       ],
       "indicators": [
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "indicator",
           "confidence": "High",
           "source": "IBM X-Force Exchange",
@@ -92,7 +92,7 @@
           ]
         },
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "indicator",
           "confidence": "High",
           "source": "IBM X-Force Exchange",
@@ -106,12 +106,12 @@
       ],
       "relationships": [
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "relationship",
           "relationship_type": "sighting-of"
         },
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "relationship",
           "relationship_type": "sighting-of"
         }
@@ -121,41 +121,41 @@
   "process_api_linkage": {
     "input": {
       "linkedEntities": [
-          {
-              "title": "Phishing & Spam",
-              "created": "2020-11-17T02:37:31.837Z",
-              "shared": "public",
-              "category": "3public",
-              "owner": {
-                  "name": "Jonas Winzen (IBM)",
-                  "userid": "http://www.ibm.com/310000H63N",
-                  "verified": "ibmexpert",
-                  "isDisabled": false
-              },
-              "id": "0777fb2ca2d2a93ccc01e1325b206c98",
-              "iocs": {},
-              "type": "casefile"
+        {
+          "title": "Phishing & Spam",
+          "created": "2020-11-17T02:37:31.837Z",
+          "shared": "public",
+          "category": "3public",
+          "owner": {
+            "name": "Jonas Winzen (IBM)",
+            "userid": "http://www.ibm.com/310000H63N",
+            "verified": "ibmexpert",
+            "isDisabled": false
           },
-          {
-              "title": "NVSP_2019-04-11",
-              "created": "2019-06-13T01:24:28.409Z",
-              "shared": "public",
-              "category": "3public",
-              "owner": {
-                  "name": "Er. Tapan Jatakia",
-                  "userid": "http://www.ibm.com/50XV1X3GTD",
-                  "isDisabled": false
-              },
-              "id": "c4e6c3d8e7e059be12bdccc7d0f9a71e",
-              "iocs": {},
-              "type": "casefile"
-          }
+          "id": "0777fb2ca2d2a93ccc01e1325b206c98",
+          "iocs": {},
+          "type": "casefile"
+        },
+        {
+          "title": "NVSP_2019-04-11",
+          "created": "2019-06-13T01:24:28.409Z",
+          "shared": "public",
+          "category": "3public",
+          "owner": {
+            "name": "Er. Tapan Jatakia",
+            "userid": "http://www.ibm.com/50XV1X3GTD",
+            "isDisabled": false
+          },
+          "id": "c4e6c3d8e7e059be12bdccc7d0f9a71e",
+          "iocs": {},
+          "type": "casefile"
+        }
       ]
-  },
+    },
     "output": {
       "sightings": [
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "confidence": "High",
           "count": 1,
           "type": "sighting",
@@ -191,7 +191,7 @@
           "source_uri": "https://exchange/collection/Phishing & Spam-0777fb2ca2d2a93ccc01e1325b206c98"
         },
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "confidence": "High",
           "count": 1,
           "type": "sighting",
@@ -229,7 +229,7 @@
       ],
       "indicators": [
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "indicator",
           "confidence": "High",
           "source": "IBM X-Force Exchange",
@@ -254,7 +254,7 @@
           "source_uri": "https://exchange/collection/Phishing & Spam-0777fb2ca2d2a93ccc01e1325b206c98"
         },
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "indicator",
           "confidence": "High",
           "source": "IBM X-Force Exchange",
@@ -281,14 +281,131 @@
       ],
       "relationships": [
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "relationship",
           "relationship_type": "member-of"
         },
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "relationship",
           "relationship_type": "member-of"
+        }
+      ]
+    }
+  },
+  "process_resolutions": {
+    "input": {
+      "A": [
+        "129.42.38.10"
+      ],
+      "AAAA": [
+        "2606:4700:0000:0000:0000:0000:6810:2548"
+      ],
+      "TXT": [],
+      "MX": [],
+      "Passive": {
+        "query": "ibm.com",
+        "records": [
+          {
+            "value": "23.194.131.195",
+            "type": "ip",
+            "recordType": "A",
+            "first": "2020-11-11T15:50:00Z",
+            "last": "2020-11-11T15:50:00Z"
+          },
+          {
+            "value": "23.194.131.195",
+            "type": "ip",
+            "recordType": "A",
+            "first": "2019-11-11T15:50:00Z",
+            "last": "2019-11-11T15:50:00Z"
+          },
+          {
+            "value": "2606:4700:0000:0000:0000:0000:6810:2548",
+            "type": "ip",
+            "recordType": "AAAA",
+            "first": "2020-11-11T15:50:00Z",
+            "last": "2020-11-11T15:50:00Z"
+          },
+          {
+            "value": "2606:4700:0000:0000:0000:0000:6810:2648",
+            "type": "ip",
+            "recordType": "AAAA",
+            "first": "2020-11-11T15:50:00Z",
+            "last": "2020-11-11T15:50:00Z"
+          }
+        ]
+      },
+      "total_rows": 4
+    },
+    "output": {
+      "sightings": [
+        {
+          "confidence": "High",
+          "count": 1,
+          "description": "IP addresses that ibm.com resolves to",
+          "internal": false,
+          "observables": [
+            {
+              "type": "domain",
+              "value": "ibm.com"
+            }
+          ],
+          "relations": [
+            {
+              "origin": "IBM X-Force Exchange Enrichment Module",
+              "related": {
+                "type": "ip",
+                "value": "129.42.38.10"
+              },
+              "relation": "Resolved_To",
+              "source": {
+                "type": "domain",
+                "value": "ibm.com"
+              }
+            },
+            {
+              "origin": "IBM X-Force Exchange Enrichment Module",
+              "related": {
+                "type": "ip",
+                "value": "23.194.131.195"
+              },
+              "relation": "Resolved_To",
+              "source": {
+                "type": "domain",
+                "value": "ibm.com"
+              }
+            },
+            {
+              "origin": "IBM X-Force Exchange Enrichment Module",
+              "related": {
+                "type": "ipv6",
+                "value": "2606:4700:0000:0000:0000:0000:6810:2548"
+              },
+              "relation": "Resolved_To",
+              "source": {
+                "type": "domain",
+                "value": "ibm.com"
+              }
+            },
+            {
+              "origin": "IBM X-Force Exchange Enrichment Module",
+              "related": {
+                "type": "ipv6",
+                "value": "2606:4700:0000:0000:0000:0000:6810:2648"
+              },
+              "relation": "Resolved_To",
+              "source": {
+                "type": "domain",
+                "value": "ibm.com"
+              }
+            }
+          ],
+          "schema_version": "1.1.1",
+          "source": "IBM X-Force Exchange",
+          "source_uri": "",
+          "title": "DNS Information",
+          "type": "sighting"
         }
       ]
     }

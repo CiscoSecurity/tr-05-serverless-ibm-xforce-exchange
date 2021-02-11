@@ -25,7 +25,7 @@
       ],
       "sightings": [
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "confidence": "High",
           "count": 1,
           "type": "sighting",
@@ -41,7 +41,7 @@
           "title": "IT"
         },
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "confidence": "High",
           "count": 1,
           "type": "sighting",
@@ -59,7 +59,7 @@
       ],
       "indicators": [
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "indicator",
           "confidence": "High",
           "source": "IBM X-Force Exchange",
@@ -68,7 +68,7 @@
           "title": "IT"
         },
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "indicator",
           "confidence": "High",
           "source": "IBM X-Force Exchange",
@@ -79,7 +79,7 @@
       ],
       "judgements": [
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "confidence": "High",
           "disposition": 5,
           "disposition_name": "Unknown",
@@ -93,7 +93,7 @@
           "type": "judgement"
         },
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "confidence": "High",
           "disposition": 3,
           "disposition_name": "Suspicious",
@@ -109,22 +109,22 @@
       ],
       "relationships": [
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "relationship",
           "relationship_type": "based-on"
         },
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "relationship",
           "relationship_type": "based-on"
         },
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "relationship",
           "relationship_type": "based-on"
         },
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "relationship",
           "relationship_type": "based-on"
         }
@@ -134,41 +134,41 @@
   "process_api_linkage": {
     "input": {
       "linkedEntities": [
-          {
-              "title": "Phishing & Spam",
-              "created": "2020-11-17T02:37:31.837Z",
-              "shared": "public",
-              "category": "3public",
-              "owner": {
-                  "name": "Jonas Winzen (IBM)",
-                  "userid": "http://www.ibm.com/310000H63N",
-                  "verified": "ibmexpert",
-                  "isDisabled": false
-              },
-              "id": "0777fb2ca2d2a93ccc01e1325b206c98",
-              "iocs": {},
-              "type": "casefile"
+        {
+          "title": "Phishing & Spam",
+          "created": "2020-11-17T02:37:31.837Z",
+          "shared": "public",
+          "category": "3public",
+          "owner": {
+            "name": "Jonas Winzen (IBM)",
+            "userid": "http://www.ibm.com/310000H63N",
+            "verified": "ibmexpert",
+            "isDisabled": false
           },
-          {
-              "title": "NVSP_2019-04-11",
-              "created": "2019-06-13T01:24:28.409Z",
-              "shared": "public",
-              "category": "3public",
-              "owner": {
-                  "name": "Er. Tapan Jatakia",
-                  "userid": "http://www.ibm.com/50XV1X3GTD",
-                  "isDisabled": false
-              },
-              "id": "c4e6c3d8e7e059be12bdccc7d0f9a71e",
-              "iocs": {},
-              "type": "casefile"
-          }
+          "id": "0777fb2ca2d2a93ccc01e1325b206c98",
+          "iocs": {},
+          "type": "casefile"
+        },
+        {
+          "title": "NVSP_2019-04-11",
+          "created": "2019-06-13T01:24:28.409Z",
+          "shared": "public",
+          "category": "3public",
+          "owner": {
+            "name": "Er. Tapan Jatakia",
+            "userid": "http://www.ibm.com/50XV1X3GTD",
+            "isDisabled": false
+          },
+          "id": "c4e6c3d8e7e059be12bdccc7d0f9a71e",
+          "iocs": {},
+          "type": "casefile"
+        }
       ]
-  },
+    },
     "output": {
       "sightings": [
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "confidence": "High",
           "count": 1,
           "type": "sighting",
@@ -204,7 +204,7 @@
           "source_uri": "https://exchange/collection/Phishing & Spam-0777fb2ca2d2a93ccc01e1325b206c98"
         },
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "confidence": "High",
           "count": 1,
           "type": "sighting",
@@ -242,7 +242,7 @@
       ],
       "indicators": [
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "indicator",
           "confidence": "High",
           "source": "IBM X-Force Exchange",
@@ -267,7 +267,7 @@
           "source_uri": "https://exchange/collection/Phishing & Spam-0777fb2ca2d2a93ccc01e1325b206c98"
         },
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "indicator",
           "confidence": "High",
           "source": "IBM X-Force Exchange",
@@ -294,14 +294,101 @@
       ],
       "relationships": [
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "relationship",
           "relationship_type": "member-of"
         },
         {
-          "schema_version": "1.0.22",
+          "schema_version": "1.1.1",
           "type": "relationship",
           "relationship_type": "member-of"
+        }
+      ]
+    }
+  },
+  "process_resolutions": {
+    "input": {
+      "RDNS": [
+        "a.com",
+        "b.com"
+      ],
+      "Passive": {
+        "query": "0x00000000000000000000ffff19191919",
+        "records": [
+          {
+            "value": "a.com",
+            "type": "url",
+            "recordType": "A",
+            "last": "2019-05-07T19:29:00Z",
+            "first": "2019-03-11T10:29:00Z"
+          },
+          {
+            "value": "c.com",
+            "type": "url",
+            "recordType": "A",
+            "last": "2020-05-07T19:29:00Z",
+            "first": "2020-03-11T10:29:00Z"
+          }
+        ]
+      },
+      "total_rows": 3
+    },
+    "output": {
+      "sightings": [
+        {
+          "schema_version": "1.1.1",
+          "confidence": "High",
+          "count": 1,
+          "type": "sighting",
+          "source": "IBM X-Force Exchange",
+          "internal": false,
+          "observables": [
+            {
+              "type": "ipv6",
+              "value": "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+            }
+          ],
+          "source_uri": "",
+          "title": "DNS Information",
+          "description": "Domains that have resolved to 2001:0db8:85a3:0000:0000:8a2e:0370:7334",
+          "relations": [
+            {
+              "origin": "IBM X-Force Exchange Enrichment Module",
+              "relation": "Resolved_To",
+              "source": {
+                "value": "a.com",
+                "type": "domain"
+              },
+              "related": {
+                "type": "ipv6",
+                "value": "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+              }
+            },
+            {
+              "origin": "IBM X-Force Exchange Enrichment Module",
+              "relation": "Resolved_To",
+              "source": {
+                "value": "b.com",
+                "type": "domain"
+              },
+              "related": {
+                "type": "ipv6",
+                "value": "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+              }
+            },
+            {
+              "origin": "IBM X-Force Exchange Enrichment Module",
+              "relation": "Resolved_To",
+              "source": {
+                "value": "c.com",
+                "type": "domain"
+              },
+              "related": {
+                "type": "ipv6",
+                "value": "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+              }
+            }
+          ]
         }
       ]
     }

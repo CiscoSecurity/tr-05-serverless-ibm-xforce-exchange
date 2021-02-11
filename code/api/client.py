@@ -84,6 +84,12 @@ class XForceClient:
                 f'/api/linkage/{path}/{observable["value"]}?maxpertype=20'
             )
 
+    def resolve(self, observable):
+        if observable['type'] in (URL, DOMAIN, IP, IPV6):
+            return self._request(
+                f'/api/resolve/{observable["value"]}?basicResolve=true'
+            )
+
     def _request(self, path, method='GET'):
         url = urljoin(self.base_url, path)
 
