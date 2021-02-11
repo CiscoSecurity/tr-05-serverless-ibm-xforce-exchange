@@ -163,4 +163,8 @@ For `IP` and `IPv6`:
 For `MD5`, `SHA1` and `SHA256`:
    - a `Verdict` based on `report` `malware.risk`
    - a `Judgement` based on `report` `malware.risk`
- 
+
+Data from X-Force `resolve` is used to generate a single CTIM `Sighting` 
+with DNS resolutions for `Domain`, `IP` and `IPv6`
+stored as `Sighting.relations`.
+The time of investigation is used as a `Sighting.observed_time`.
