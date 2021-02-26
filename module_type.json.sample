@@ -20,14 +20,14 @@
       "type": "api_key",
       "label": "X-Force API Key:",
       "required": true,
-      "tooltip": "Retrieved from https://exchange.xforce.ibmcloud.com/settings/api (i.e. aa86edcc-8a8b-4999-be94-34cf80afe013)"
+      "tooltip": "Retrieved from https://exchange.xforce.ibmcloud.com/settings/api"
     },
     {
       "key": "custom_password",
       "type": "password",
       "label": "X-Force API Password:",
       "required": true,
-      "tooltip": "Retrieved from https://exchange.xforce.ibmcloud.com/settings/api (i.e. ca72efff-499d-6919-aa66-3faefaeee001)"
+      "tooltip": "Retrieved from https://exchange.xforce.ibmcloud.com/settings/api"
     },
     {
       "key": "custom_CTR_ENTITIES_LIMIT",

@@ -76,7 +76,8 @@ class CriticalXForceResponseError(TRFormattedError):
         }
 
         if response.status_code == HTTPStatus.UNAUTHORIZED:
-            message = 'Authorization failed: Authorization failed on IBM X-Force Exchange side'
+            message = 'Authorization failed: ' \
+                      'Authorization failed on IBM X-Force Exchange side'
         else:
             message = (f'Unexpected response from'
                        f' IBM X-Force Exchange: {response.json()["error"]}')

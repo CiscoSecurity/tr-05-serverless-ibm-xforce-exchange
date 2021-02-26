@@ -42,8 +42,8 @@ def test_call_with_authorization_header_missing(
     )
 
 
-def test_call_with_authorization_type_error(route, client, valid_json,
-                                            authorization_errors_expected_payload):
+def test_call_with_authorization_type_error(
+        route, client, valid_json, authorization_errors_expected_payload):
     response = client.post(
         route, json=valid_json, headers={'Authorization': 'Basic blabla'}
     )
@@ -109,9 +109,13 @@ def test_call_with_jwt_payload_structure_error(
         xforce_response_unauthorized_creds,
         authorization_errors_expected_payload
 ):
-    mock_request.side_effect = (xforce_response_unauthorized_creds, xforce_response_public_key)
+    mock_request.side_effect = (
+        xforce_response_unauthorized_creds,
+        xforce_response_public_key
+    )
     response = client.post(
-        route, json=valid_json, headers=headers(valid_jwt(wrong_structure=True))
+        route, json=valid_json,
+        headers=headers(valid_jwt(wrong_structure=True))
     )
 
     assert response.status_code == HTTPStatus.OK

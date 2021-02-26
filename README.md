@@ -20,9 +20,9 @@ Open the code folder in your terminal.
 cd code
 ```
 
-If you want to test the application you will require Docker and several dependencies from the [requirements.txt](requirements.txt) file:
+If you want to test the application you will require Docker and several dependencies from the [requirements.txt](code/requirements.txt) file:
 ```
-pip install --upgrade --requirement requirements.txt
+pip install --upgrade --requirement code/requirements.txt
 ```
 
 You can perform two kinds of testing:
