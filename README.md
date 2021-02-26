@@ -6,6 +6,8 @@ A Cisco SecureX Concrete Relay implementation using [IBM X-Force Exchange](https
 
 The Relay itself is just a simple application written in Python that can be easily packaged and deployed.  This relay is now Cisco Hosted and no longer requires AWS Lambda.
 
+The code is provided here purely for educational purposes.
+
 ## Rationale
 
 - We need an application that will translate API requests from SecureX Threat Response to the third-party integration, and vice versa.
