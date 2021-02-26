@@ -47,7 +47,7 @@ def deliberate_observables():
 
     try:
         with ThreadPoolExecutor(
-                max_workers=min(len(observables), (cpu_count() or 1) * 5)
+                max_workers=min(len(observables) or 1, (cpu_count() or 1) * 5)
         ) as executor:
             iterator = executor.map(deliberate, observables)
 

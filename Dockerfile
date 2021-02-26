@@ -17,4 +17,3 @@ RUN chmod +x /*.sh
 # entrypoint
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/start.sh"]
-#ENTRYPOINT ["/bin/sh"]

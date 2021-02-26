@@ -1,24 +1,25 @@
+import jwt
 import json
-from datetime import datetime
+
+from app import app
+from pytest import fixture
 from http import HTTPStatus
 from unittest.mock import MagicMock
-
-from authlib.jose import jwt
-from pytest import fixture
-
-from api.errors import UNKNOWN, INVALID_ARGUMENT
-from app import app
-
-
-@fixture(scope='session')
-def secret_key():
-    # Generate some string based on the current datetime.
-    return datetime.utcnow().isoformat()
+from api.errors import (
+    UNKNOWN,
+    INVALID_ARGUMENT,
+    AUTH_ERROR
+)
+from tests.unit.mock_for_tests import (
+    PRIVATE_KEY,
+    EXPECTED_RESPONSE_OF_JWKS_ENDPOINT,
+    RESPONSE_OF_JWKS_ENDPOINT_WITH_WRONG_KEY
+)
 
 
 @fixture(scope='session')
-def client(secret_key):
-    app.secret_key = secret_key
+def client():
+    app.rsa_private_key = PRIVATE_KEY
 
     app.testing = True
 
@@ -28,46 +29,34 @@ def client(secret_key):
 
 @fixture(scope='session')
 def valid_jwt(client):
-    header = {'alg': 'HS256'}
+    def _make_jwt(
+            key='some_key',
+            password='some_pass',
+            jwks_host='visibility.amp.cisco.com',
+            aud='http://localhost',
+            kid='02B1174234C29F8EFB69911438F597FF3FFEE6B7',
+            ctr_entities_limit=0,
+            wrong_structure=False
+    ):
+        payload = {
+            'key': key,
+            'password': password,
+            'jwks_host': jwks_host,
+            'aud': aud,
+            'CTR_ENTITIES_LIMIT': ctr_entities_limit
+        }
 
-    payload = {'key': 'key', 'password': 'password'}
+        if wrong_structure:
+            payload.pop('key')
 
-    secret_key = client.application.secret_key
+        return jwt.encode(
+            payload, client.application.rsa_private_key, algorithm='RS256',
+            headers={
+                'kid': kid
+            }
+        )
 
-    return jwt.encode(header, payload, secret_key, check=False).decode('ascii')
-
-
-@fixture(scope='session')
-def valid_jwt_with_wrong_payload(client):
-    header = {'alg': 'HS256'}
-
-    payload = {'key': 'key'}
-
-    secret_key = client.application.secret_key
-
-    return jwt.encode(header, payload, secret_key, check=False).decode('ascii')
-
-
-@fixture(scope='session')
-def invalid_jwt(valid_jwt):
-    header, payload, signature = valid_jwt.split('.')
-
-    def jwt_decode(s: str) -> dict:
-        from authlib.common.encoding import urlsafe_b64decode, json_loads
-        return json_loads(urlsafe_b64decode(s.encode('ascii')))
-
-    def jwt_encode(d: dict) -> str:
-        from authlib.common.encoding import json_dumps, urlsafe_b64encode
-        return urlsafe_b64encode(json_dumps(d).encode('ascii')).decode('ascii')
-
-    payload = jwt_decode(payload)
-
-    # Corrupt the valid JWT by tampering with its payload.
-    payload['key'] = 'wrong'
-
-    payload = jwt_encode(payload)
-
-    return '.'.join([header, payload, signature])
+    return _make_jwt
 
 
 def xforce_api_response_mock(status_code, payload=None):
@@ -83,7 +72,23 @@ def xforce_api_response_mock(status_code, payload=None):
 
 
 @fixture(scope='session')
-def xforce_response_unauthorized_creds(secret_key):
+def xforce_response_public_key():
+    return xforce_api_response_mock(
+        HTTPStatus.OK,
+        EXPECTED_RESPONSE_OF_JWKS_ENDPOINT
+    )
+
+
+@fixture(scope='session')
+def xforce_response_wrong_public_key():
+    return xforce_api_response_mock(
+        HTTPStatus.OK,
+        RESPONSE_OF_JWKS_ENDPOINT_WITH_WRONG_KEY
+    )
+
+
+@fixture(scope='session')
+def xforce_response_unauthorized_creds():
     return xforce_api_response_mock(
         HTTPStatus.UNAUTHORIZED,
         {'error': 'Not authorized.'}
@@ -91,7 +96,7 @@ def xforce_response_unauthorized_creds(secret_key):
 
 
 @fixture(scope='session')
-def xforce_response_service_unavailable(secret_key):
+def xforce_response_service_unavailable():
     return xforce_api_response_mock(
         HTTPStatus.SERVICE_UNAVAILABLE,
         {'error': 'SERVICE UNAVAILABLE.'}
@@ -99,7 +104,7 @@ def xforce_response_service_unavailable(secret_key):
 
 
 @fixture(scope='session')
-def xforce_response_not_found(secret_key):
+def xforce_response_not_found():
     return xforce_api_response_mock(
         HTTPStatus.NOT_FOUND,
         {'error': 'NOT FOUND.'}
@@ -107,12 +112,12 @@ def xforce_response_not_found(secret_key):
 
 
 @fixture(scope='session')
-def xforce_response_ok(secret_key):
+def xforce_response_ok():
     return xforce_api_response_mock(HTTPStatus.OK, payload='OK')
 
 
 @fixture(scope='session')
-def xforce_response_success_enrich_report(secret_key):
+def xforce_response_success_enrich_report():
     return xforce_api_response_mock(
         HTTPStatus.OK,
         payload={
@@ -132,7 +137,7 @@ def xforce_response_success_enrich_report(secret_key):
 
 
 @fixture(scope='session')
-def xforce_response_success_enrich_resolve(secret_key):
+def xforce_response_success_enrich_resolve():
     return xforce_api_response_mock(
         HTTPStatus.OK,
         payload={
@@ -183,7 +188,7 @@ def xforce_response_success_enrich_resolve(secret_key):
 
 
 @fixture(scope='session')
-def xforce_response_success_enrich_api_linkage(secret_key):
+def xforce_response_success_enrich_api_linkage():
     return xforce_api_response_mock(
         HTTPStatus.OK,
         payload={
@@ -344,3 +349,22 @@ def invalid_json_expected_body(route):
             ]
         }
     )
+
+
+@fixture(scope='module')
+def authorization_errors_expected_payload(route):
+    def _make_payload_message(message):
+        payload = {
+            'errors':
+                [
+                    {
+                        'code': AUTH_ERROR,
+                        'message': f'Authorization failed: {message}',
+                        'type': 'fatal'
+                    }
+                ]
+
+        }
+        return payload
+
+    return _make_payload_message

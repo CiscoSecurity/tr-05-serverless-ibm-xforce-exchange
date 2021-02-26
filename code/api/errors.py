@@ -76,7 +76,7 @@ class CriticalXForceResponseError(TRFormattedError):
         }
 
         if response.status_code == HTTPStatus.UNAUTHORIZED:
-            message = 'Authorization failed on IBM X-Force Exchange side'
+            message = 'Authorization failed: Authorization failed on IBM X-Force Exchange side'
         else:
             message = (f'Unexpected response from'
                        f' IBM X-Force Exchange: {response.json()["error"]}')
@@ -84,4 +84,12 @@ class CriticalXForceResponseError(TRFormattedError):
         super().__init__(
             status_code_map.get(response.status_code),
             message
+        )
+
+
+class WatchdogError(TRFormattedError):
+    def __init__(self):
+        super().__init__(
+            code='health check failed',
+            message='Invalid Health Check'
         )
