@@ -127,81 +127,12 @@ zappa undeploy dev
 command does not change the current `URL`. The `undeploy` command destroys the
 old `URL` forever.
 
-### JWT
-
-Before you can start using the live Lambda, you have to encode your third-party
-credentials into a JWT using a generated secret key.
-
-In brief, [JSON Web Token (JWT)](https://en.wikipedia.org/wiki/JSON_Web_Token)
-is a way of encoding any JSON data into a signed token. The signature ensures
-the integrity of the data, i.e. the fact that it has not been changed in any
-way in transit between the sender and the recipient.
-
-The JWT standard supports many different algorithms for signing tokens but we
-are interested in HS256. The algorithm requires to generate (and securely store
-somewhere) a 256-bit (i.e. 64-character) string a.k.a. the secret key.
-
-Once the secret key has been generated and used for encoding your third-party
-credentials into a JWT, the token has to be provided on each request to the
-application as the `Authorization: Bearer <JWT>` header (this will be
-automatically done for you if you create a corresponding module in SecureX Threat
-Response). Unless the signature verification fails, the application will decode
-the token to restore your original third-party credentials and will try to
-authenticate to the corresponding third-party service on your behalf.
-
-We recommend taking a look at [JWT.IO](https://jwt.io/), it is a good resource
-for learning how JWTs work.
-
-### SecureX Threat Response Module
-
-Now, the only things left to do are:
-
-- Generate a secret key and encode your credentials into a token. Let us name
-those `SECRET_KEY` and `JWT` respectively so that we can refer to them later
-on.
-
-- Set the `SECRET_KEY` environment variable for your Lambda using the
-corresponding value from the previous step.
-
-- Create a corresponding SecureX Threat Response module based on your Lambda.
-
-To simplify the JWT-related stuff, we have prepared for you the
-[SecureX Threat Response JWT Generator](https://github.com/CiscoSecurity/tr-05-jwt-generator)
-tool that provides only a single easy-to-use `jwt` command. Since the tool is
-included into the [requirements.txt](requirements.txt) file, at this point it
-should already have been installed along with the other dependencies.
-
-Follow the steps below to finish the deployment procedure:
-
-1. Run the `jwt` command of the tool specifying a Zappa stage, e.g. `jwt dev`.
-It will prompt you to enter your third-party credentials according to the `jwt`
-structure defined in the [Module Settings](module_settings.json).
-
-2. The command will generate a `SECRET_KEY`/`JWT` pair for you based on your
-just entered credentials. Make sure to save both.
-
-3. The command will also build the link to the AWS Console page with your
-Lambda's environment variables. Go set the `SECRET_KEY` environment variable
-there. This is important since the Lambda has to know the `SECRET_KEY` so that
-it can verify and decode the `JWT` from incoming requests. If you do not
-understand how to set the `SECRET_KEY` environment variable then check the
-[AWS Environment Variables](aws/EnvironmentVariables.md) guide on passing
-arbitrary environment variables to Lambdas.
-
-4. The command will also build the links to the SecureX Threat Response pages (in all
-available regions) with the corresponding module creation forms. Select the
-link corresponding to your SecureX Threat Response region. The form there will require
-you to enter both your Lambda's `URL` and your `JWT` (along with a unique name)
-to finally create your SecureX Threat Response module.
-
-That is it! Your Serverless Relay is ready to use! Congratulations!
-
 ## Step 3: Testing (Optional)
 
 If you want to test the application you have to install a couple of extra
-dependencies from the [test-requirements.txt](test-requirements.txt) file:
+dependencies from the [requirements.txt](requirements.txt) file:
 ```
-pip install --upgrade --requirement test-requirements.txt
+pip install --upgrade --requirement requirements.txt
 ```
 
 You can perform two kinds of testing:
@@ -273,29 +204,6 @@ header set to `Bearer <JWT>`.
 - `md5`
 - `sha1`
 - `sha256`
-
-### JWT Payload Structure
-
-```json
-{
-  "key": "<IBM_X-FORCE_EXCHANGE_API_KEY>",
-  "password": "<IBM_X-FORCE_EXCHANGE_API_PASSWORD>"
-}
-```
-
-### Supported Environment Variables
-
-- `CTR_ENTITIES_LIMIT`
-  - Restricts the maximum number of CTIM entities of each type returned in a
-  single response per each requested observable.
-  - Applies to the following CTIM entities:
-    - `Judgement`,
-    - `Indicator`,
-    - `Sighting`.
-  - Must be a positive integer. Defaults to 100 (if unset or incorrect).
-  Has the upper bound of 1000 to avoid getting overwhelmed with too much data,
-  so any greater values are still acceptable but also limited at the same time.
-  
 
 ### CTIM Mapping Specifics
 

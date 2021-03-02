@@ -28,15 +28,18 @@ def test_enrich_call_success(
         xforce_response_success_enrich_report,
         xforce_response_success_enrich_resolve,
         xforce_response_success_enrich_api_linkage,
-        success_enrich_expected_body
+        success_enrich_expected_body,
+        xforce_response_public_key
 ):
-    with patch('requests.request') as get_mock:
+    with patch('requests.request') as get_mock, \
+            patch('requests.get') as get_public_key_mock:
+        get_public_key_mock.return_value = xforce_response_public_key
         get_mock.side_effect = [xforce_response_success_enrich_report,
                                 xforce_response_success_enrich_resolve,
                                 xforce_response_success_enrich_api_linkage]
 
         response = client.post(
-            route, headers=headers(valid_jwt), json=valid_json
+            route, headers=headers(valid_jwt()), json=valid_json
         )
 
         assert response.status_code == HTTPStatus.OK
@@ -60,11 +63,14 @@ def test_enrich_call_with_critical_error(
         route, client, valid_jwt, valid_json,
         xforce_response_service_unavailable,
         service_unavailable_expected_body,
+        xforce_response_public_key
 ):
-    with patch('requests.request') as get_mock:
+    with patch('requests.request') as get_mock, \
+            patch('requests.get') as get_public_key_mock:
+        get_public_key_mock.return_value = xforce_response_public_key
         get_mock.return_value = xforce_response_service_unavailable
         response = client.post(
-            route, headers=headers(valid_jwt), json=valid_json
+            route, headers=headers(valid_jwt()), json=valid_json
         )
 
         assert response.status_code == HTTPStatus.OK
@@ -74,11 +80,14 @@ def test_enrich_call_with_critical_error(
 def test_enrich_call_with_not_critical_error(
         route, client, valid_jwt, valid_json,
         xforce_response_not_found, not_found_expected_body,
+        xforce_response_public_key
 ):
-    with patch('requests.request') as get_mock:
+    with patch('requests.request') as get_mock, \
+            patch('requests.get') as get_public_key_mock:
+        get_public_key_mock.return_value = xforce_response_public_key
         get_mock.return_value = xforce_response_not_found
         response = client.post(
-            route, headers=headers(valid_jwt), json=valid_json
+            route, headers=headers(valid_jwt()), json=valid_json
         )
 
         assert response.status_code == HTTPStatus.OK
@@ -87,16 +96,19 @@ def test_enrich_call_with_not_critical_error(
 
 def test_enrich_call_with_ssl_error(
         route, client, valid_jwt, valid_json,
-        ssl_error_expected_body
+        ssl_error_expected_body,
+        xforce_response_public_key
 ):
-    with patch('requests.request') as get_mock:
+    with patch('requests.request') as get_mock, \
+            patch('requests.get') as get_public_key_mock:
+        get_public_key_mock.return_value = xforce_response_public_key
         mock_exception = MagicMock()
         mock_exception.reason.args.__getitem__().verify_message \
             = 'self signed certificate'
         get_mock.side_effect = SSLError(mock_exception)
 
         response = client.post(
-            route, headers=headers(valid_jwt), json=valid_json
+            route, headers=headers(valid_jwt()), json=valid_json
         )
 
         assert response.status_code == HTTPStatus.OK
@@ -105,15 +117,19 @@ def test_enrich_call_with_ssl_error(
 
 def test_enrich_call_with_key_error(
         route, client, valid_jwt, valid_json,
-        xforce_response_ok, key_error_expected_body
+        xforce_response_ok, key_error_expected_body,
+        xforce_response_public_key
 ):
     with patch('requests.request') as get_mock,\
-            patch('api.mappings.Domain.extract_verdict') as extract_mock:
+            patch('api.mappings.Domain.extract_verdict') as extract_mock,\
+            patch('requests.get') as get_public_key_mock:
+
+        get_public_key_mock.return_value = xforce_response_public_key
         get_mock.return_value = xforce_response_ok
         extract_mock.side_effect = [KeyError('foo')]
 
         response = client.post(
-            route, headers=headers(valid_jwt),
+            route, headers=headers(valid_jwt()),
             json=valid_json
         )
 
@@ -126,11 +142,14 @@ def invalid_json():
     return [{'type': 'domain'}]
 
 
+@patch('requests.get')
 def test_enrich_call_with_invalid_json(
-        route, client, valid_jwt, invalid_json, invalid_json_expected_body,
+        mock_request, route, client, valid_jwt, invalid_json,
+        invalid_json_expected_body, xforce_response_public_key
 ):
+    mock_request.return_value = xforce_response_public_key
     response = client.post(
-        route, headers=headers(valid_jwt), json=invalid_json
+        route, headers=headers(valid_jwt()), json=invalid_json
     )
 
     assert response.status_code == HTTPStatus.OK

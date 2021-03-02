@@ -1,5 +1,5 @@
-
 [![Gitter Chat](https://img.shields.io/badge/gitter-join%20chat-brightgreen.svg)](https://gitter.im/CiscoSecurity/Threat-Response "Gitter Chat")
+
 # IBM X-Force Exchange Relay (Cisco Hosted)
 
 A Cisco SecureX Concrete Relay implementation using [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com) as a third-party Cyber Threat Intelligence service provider.
@@ -15,14 +15,19 @@ The code is provided here purely for educational purposes.
 
 ## Testing (Optional)
 
-If you want to test the application you will require Docker and several dependencies from the [requirements.txt](requirements.txt) file:
+Open the code folder in your terminal.
 ```
-pip install --upgrade --requirement requirements.txt
+cd code
+```
+
+If you want to test the application you will require Docker and several dependencies from the [requirements.txt](code/requirements.txt) file:
+```
+pip install --upgrade --requirement code/requirements.txt
 ```
 
 You can perform two kinds of testing:
 
-- Run static code analysis checking for any semantic discrepancies and [PEP 8] https://www.python.org/dev/peps/pep-0008/) compliance:
+- Run static code analysis checking for any semantic discrepancies and [PEP 8](https://www.python.org/dev/peps/pep-0008/) compliance:
 
   `flake8 code`
 
@@ -43,7 +48,7 @@ In order to build the application, we need to use a `Dockerfile`.
  1. Open a terminal.  Build the container image using the `docker build` command.
 
 ```
-docker build -t tr-05-ibm-xforce-exchange
+docker build -t tr-05-ibm-xforce-exchange .
 ```
 
  2. Once the container is built, and an image is successfully created, start your container using the `docker run` command and specify the name of the image we have just created.  By default, the container will listen for HTTP requests using port 9090.
@@ -113,29 +118,6 @@ docker logs tr-05-ibm-xforce-exchange
 - `md5`
 - `sha1`
 - `sha256`
-
-### JWT Payload Structure
-
-```json
-{
-  "key": "<IBM_X-FORCE_EXCHANGE_API_KEY>",
-  "password": "<IBM_X-FORCE_EXCHANGE_API_PASSWORD>"
-}
-```
-
-### Supported Environment Variables
-
-- `CTR_ENTITIES_LIMIT`
-  - Restricts the maximum number of CTIM entities of each type returned in a
-  single response per each requested observable.
-  - Applies to the following CTIM entities:
-    - `Judgement`,
-    - `Indicator`,
-    - `Sighting`.
-  - Must be a positive integer. Defaults to 100 (if unset or incorrect).
-  Has the upper bound of 1000 to avoid getting overwhelmed with too much data,
-  so any greater values are still acceptable but also limited at the same time.
-  
 
 ### CTIM Mapping Specifics
 
