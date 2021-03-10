@@ -84,8 +84,8 @@ def get_credentials():
             token, key=key, algorithms=['RS256'], audience=[aud.rstrip('/')]
         )
 
-        assert payload.get('key')
-        assert payload.get('password')
+        if not payload['key'] or not payload['password']:
+            raise KeyError
 
         set_ctr_entities_limit(payload)
 
