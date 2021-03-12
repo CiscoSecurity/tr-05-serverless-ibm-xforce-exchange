@@ -70,13 +70,12 @@ def test_call_with_jwt_structure_error(route, client, valid_json,
 def test_call_with_missing_jwks_host(
         mock_request, route, client, valid_json, valid_jwt,
         authorization_errors_expected_payload,
-        xforce_response_public_key
 ):
-    mock_request.return_value = xforce_response_public_key
+    mock_request.side_effect = KeyError()
 
     response = client.post(
         route, json=valid_json,
-        headers=headers(valid_jwt(jwks_host=''))
+        headers=headers(valid_jwt())
     )
     assert response.status_code == HTTPStatus.OK
     assert response.json == authorization_errors_expected_payload(
@@ -106,13 +105,9 @@ def test_call_with_wrong_key(
 def test_call_with_jwt_payload_structure_error(
         mock_request, route, client, valid_json, valid_jwt,
         xforce_response_public_key,
-        xforce_response_unauthorized_creds,
         authorization_errors_expected_payload
 ):
-    mock_request.side_effect = (
-        xforce_response_unauthorized_creds,
-        xforce_response_public_key
-    )
+    mock_request.return_value = xforce_response_public_key
     response = client.post(
         route, json=valid_json,
         headers=headers(valid_jwt(wrong_structure=True))
