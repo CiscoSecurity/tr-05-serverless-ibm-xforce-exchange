@@ -64,8 +64,8 @@ def get_credentials():
     """
 
     expected_errors = {
-        KeyError: WRONG_PAYLOAD_STRUCTURE,
-        AssertionError: JWKS_HOST_MISSING,
+        KeyError: JWKS_HOST_MISSING,
+        AssertionError: WRONG_PAYLOAD_STRUCTURE,
         InvalidSignatureError: WRONG_KEY,
         DecodeError: WRONG_JWT_STRUCTURE,
         InvalidAudienceError: WRONG_AUDIENCE,
@@ -76,8 +76,7 @@ def get_credentials():
     try:
         jwks_host = jwt.decode(
             token, options={'verify_signature': False}
-        ).get('jwks_host')
-        assert jwks_host
+        )['jwks_host']
         key = get_public_key(jwks_host, token)
         aud = request.url_root
         payload = jwt.decode(
