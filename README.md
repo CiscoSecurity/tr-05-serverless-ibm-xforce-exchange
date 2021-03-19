@@ -1,5 +1,7 @@
 [![Gitter Chat](https://img.shields.io/badge/gitter-join%20chat-brightgreen.svg)](https://gitter.im/CiscoSecurity/Threat-Response "Gitter Chat")
 
+# NOTE! This code does not support installation within AWS
+
 # IBM X-Force Exchange Relay (Cisco Hosted)
 
 A Cisco SecureX Concrete Relay implementation using [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com) as a third-party Cyber Threat Intelligence service provider.
