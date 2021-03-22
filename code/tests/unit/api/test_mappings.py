@@ -38,36 +38,6 @@ sha256_test_data = TestData(
 )
 
 
-def input_sets():
-    TestData = namedtuple('TestData', 'file mapping')
-    yield TestData(
-        'domain.json', Domain({'type': 'domain', 'value': 'ibm.com'})
-    )
-    yield TestData(
-        'url.json',
-        Domain({'type': 'url', 'value': 'www.ibm.com/smarterplanet'})
-    )
-    yield TestData('ip.json', IP({'type': 'ip', 'value': '1.2.3.4'}))
-    yield TestData(
-        'ipv6.json',
-        IPV6({'type': 'ipv6',
-              'value': '2001:0db8:85a3:0000:0000:8a2e:0370:7334'})
-    )
-    yield TestData(
-        'md5.json',
-        MD5({'type': 'md5', 'value': '34d5ea586a61b0aba512c0cb1d3d8b15'})
-    )
-    yield TestData(
-        'sha1.json',
-        SHA1({'type': 'sha1',
-              'value': '0x5C11EE95649AAC7A4DE06BC83CE45C15448F44E0'}))
-    yield TestData(
-        'sha256.json',
-        SHA256({'type': 'sha256',
-                'value': '091835b16192e526ee1b8a04d0fcef5'
-                         '34544cad306672066f2ad6973a4b18b19'}))
-
-
 @fixture(
     scope='module', ids=lambda d: d.file,
     params=(domain_test_data, url_test_data,

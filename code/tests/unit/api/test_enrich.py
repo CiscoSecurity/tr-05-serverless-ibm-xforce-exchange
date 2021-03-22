@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from unittest.mock import patch, MagicMock
 
-from pytest import fixture
+from pytest import fixture, mark
 from requests.exceptions import SSLError
 
 from .utils import headers
@@ -23,13 +23,15 @@ def valid_json():
     return [{'type': 'domain', 'value': 'ibm.com'}]
 
 
+@mark.parametrize('limit', (0, 1, 2), ids=lambda limit: f"limit={limit}")
 def test_enrich_call_success(
         route, client, valid_jwt, valid_json,
         xforce_response_success_enrich_report,
         xforce_response_success_enrich_resolve,
         xforce_response_success_enrich_api_linkage,
         success_enrich_expected_body,
-        xforce_response_public_key
+        xforce_response_public_key,
+        limit
 ):
     with patch('requests.request') as get_mock, \
             patch('requests.get') as get_public_key_mock:
@@ -39,7 +41,9 @@ def test_enrich_call_success(
                                 xforce_response_success_enrich_api_linkage]
 
         response = client.post(
-            route, headers=headers(valid_jwt()), json=valid_json
+            route,
+            headers=headers(valid_jwt(ctr_entities_limit=limit)),
+            json=valid_json
         )
 
         assert response.status_code == HTTPStatus.OK
@@ -56,7 +60,7 @@ def test_enrich_call_success(
                     doc.pop('source_ref', None)
                     doc.pop('target_ref', None)
 
-        assert response == success_enrich_expected_body
+        assert response == success_enrich_expected_body(limit)
 
 
 def test_enrich_call_with_critical_error(
