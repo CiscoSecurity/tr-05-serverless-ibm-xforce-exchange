@@ -1,4 +1,4 @@
-from abc import ABCMeta, abstractmethod, ABC
+from abc import abstractmethod, ABC
 from datetime import datetime, timedelta
 from operator import itemgetter
 from urllib.parse import urljoin
@@ -55,7 +55,7 @@ IPV6_DNS_RECORD_TYPE = 'AAAA'
 IP_DNS_RECORD_TYPES = (IP_DNS_RECORD_TYPE, IPV6_DNS_RECORD_TYPE)
 
 
-class Mapping(metaclass=ABCMeta):
+class Mapping(ABC):
 
     def __init__(self, observable, source_uri=''):
         self.observable = observable
