@@ -289,15 +289,17 @@ def ssl_error_expected_body(route, success_enrich_refer_body):
 
 @fixture(scope='module')
 def success_enrich_expected_body(route, success_enrich_refer_body):
-    with open('tests/unit/data/' + 'enrich_observe_success.json') as file:
-        data = json.load(file)
+    def make_body(limit=0):
+        with open('tests/unit/data/' + 'enrich_observe_success.json') as file:
+            data = json.load(file)[str(limit)]
 
-        if route.endswith('/deliberate/observables'):
-            data = {'data': {'verdicts': data['data']['verdicts']}}
+            if route.endswith('/deliberate/observables'):
+                data = {'data': {'verdicts': data['data']['verdicts']}}
 
-    return expected_body(
-        route, data, refer_body=success_enrich_refer_body
-    )
+        return expected_body(
+            route, data, refer_body=success_enrich_refer_body
+        )
+    return make_body
 
 
 @fixture(scope='module')

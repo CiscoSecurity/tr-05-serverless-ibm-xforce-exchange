@@ -90,30 +90,32 @@ def observe_observables():
             mapping = Mapping.for_(observable, source_uri=refer_link)
 
             if mapping:
-                report = client.report(observable)
-                if report:
-                    report_bundle = mapping.process_report_data(
-                        report, number_of_days_verdict_valid,
-                        number_of_days_judgement_valid,
-                        number_of_days_indicator_valid, limit
-                    )
-                    limit -= len(report_bundle.get(SIGHTING))
-                    g.bundle.merge(report_bundle)
+                if limit > 0:
+                    report = client.report(observable)
+                    if report:
+                        report_bundle = mapping.process_report_data(
+                            report, number_of_days_verdict_valid,
+                            number_of_days_judgement_valid,
+                            number_of_days_indicator_valid, limit
+                        )
+                        limit -= len(report_bundle.get(SIGHTING))
+                        g.bundle.merge(report_bundle)
 
-                if isinstance(mapping, DNSInformationMapping):
+                if limit > 0 and isinstance(mapping, DNSInformationMapping):
                     resolutions_bundle = mapping.process_resolutions(
                         client.resolve(observable)
                     )
                     limit -= len(resolutions_bundle.get(SIGHTING))
                     g.bundle.merge(resolutions_bundle)
 
-                api_linkage = client.api_linkage(observable)
-                if api_linkage:
-                    api_linkage_bundle = mapping.process_api_linkage(
-                        api_linkage, ui_url,
-                        number_of_days_indicator_valid, limit
-                    )
-                    g.bundle.merge(api_linkage_bundle)
+                if limit > 0:
+                    api_linkage = client.api_linkage(observable)
+                    if api_linkage:
+                        api_linkage_bundle = mapping.process_api_linkage(
+                            api_linkage, ui_url,
+                            number_of_days_indicator_valid, limit
+                        )
+                        g.bundle.merge(api_linkage_bundle)
 
     except KeyError:
         add_error(XForceKeyError())
