@@ -22,16 +22,16 @@ Open the code folder in your terminal.
 cd code
 ```
 
-If you want to test the application you will require Docker and several dependencies from the [requirements.txt](code/requirements.txt) file:
+If you want to test the application you will require Docker and several dependencies from the [Pipfile](code/Pipfile) file:
 ```
-pip install --upgrade --requirement code/requirements.txt
+pip install --no-cache-dir --upgrade pipenv && pipenv install --dev
 ```
 
 You can perform two kinds of testing:
 
 - Run static code analysis checking for any semantic discrepancies and [PEP 8](https://www.python.org/dev/peps/pep-0008/) compliance:
 
-  `flake8 code`
+  `flake8 .`
 
 - Run the suite of unit tests and measure the code coverage:
 
