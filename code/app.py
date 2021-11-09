@@ -3,7 +3,6 @@ from flask import Flask, jsonify
 from api.enrich import enrich_api
 from api.errors import TRFormattedError
 from api.health import health_api
-from api.respond import respond_api
 from api.watchdog import watchdog_api
 from api.utils import add_error, jsonify_result
 from api.version import version_api
@@ -15,7 +14,6 @@ app.config.from_object('config.Config')
 
 app.register_blueprint(health_api)
 app.register_blueprint(enrich_api)
-app.register_blueprint(respond_api)
 app.register_blueprint(watchdog_api)
 app.register_blueprint(version_api)
 
