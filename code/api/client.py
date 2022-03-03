@@ -1,6 +1,6 @@
 from http import HTTPStatus
 from urllib.parse import urljoin
-
+import time
 import requests
 from requests.auth import HTTPBasicAuth
 from requests.exceptions import SSLError
@@ -96,9 +96,12 @@ class XForceClient:
         url = urljoin(self.base_url, path)
 
         try:
+            t0 = time.clock()
             response = requests.request(
                 method, url, auth=self.auth, headers=self.headers
             )
+            t1 = time.clock() - t0
+            print("Time elapsed: ", t1 - t0) 
         except SSLError as error:
             raise XForceSSLError(error)
         except UnicodeEncodeError:
