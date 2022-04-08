@@ -7,7 +7,9 @@ from requests.exceptions import SSLError
 
 from api.errors import (
     CriticalXForceResponseError,
-    XForceSSLError
+    XForceSSLError,
+    AuthorizationError,
+    AUTHORIZATION_FAILED
 )
 
 NOT_CRITICAL_ERRORS = (
@@ -99,6 +101,8 @@ class XForceClient:
             )
         except SSLError as error:
             raise XForceSSLError(error)
+        except UnicodeEncodeError:
+            raise AuthorizationError(AUTHORIZATION_FAILED)
 
         if response.ok:
             return response.json()

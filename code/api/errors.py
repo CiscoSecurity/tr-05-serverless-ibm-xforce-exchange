@@ -8,6 +8,7 @@ AUTH_ERROR = 'authorization error'
 NOT_FOUND = 'not found'
 UNAVAILABLE = 'unavailable'
 KEY_ERROR = 'key error'
+AUTHORIZATION_FAILED = 'Authorization failed on IBM X-Force Exchange side'
 
 
 class TRFormattedError(Exception):
@@ -76,8 +77,7 @@ class CriticalXForceResponseError(TRFormattedError):
         }
 
         if response.status_code == HTTPStatus.UNAUTHORIZED:
-            message = 'Authorization failed: ' \
-                      'Authorization failed on IBM X-Force Exchange side'
+            message = f'Authorization failed: {AUTHORIZATION_FAILED}'
         else:
             message = (f'Unexpected response from'
                        f' IBM X-Force Exchange: {response.json()["error"]}')
